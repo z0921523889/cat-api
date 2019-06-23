@@ -11,7 +11,13 @@ COPY . .
 
 RUN go get github.com/gin-gonic/gin
 
-RUN go build -o ./app ./main.go
+RUN go get github.com/go-xorm/xorm
+
+RUN go get github.com/lib/pq
+
+RUN github.com/gin-contrib/sessions
+
+RUN go build -o ./app ./run/main.go
 
 FROM alpine:latest
 
