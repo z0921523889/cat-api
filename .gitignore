@@ -10,5 +10,10 @@
 .idea/caches
 .idea/vcs.xml
 
-#test
+
+# env file
+.env
+
+# test
 ./test/*
+

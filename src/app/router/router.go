@@ -1,8 +1,8 @@
 package router
 
 import (
-	"cat-api/src/controller"
-	"cat-api/src/middleware"
+	"cat-api/src/app/controller"
+	"cat-api/src/app/middleware"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
@@ -15,6 +15,7 @@ var authMiddleware = &middleware.AuthMiddleware{}
 
 func init() {
 	Router = gin.Default()
+	Router.MaxMultipartMemory = 1
 	// set up session using cookie
 	store := cookie.NewStore([]byte("secret"))
 	Router.Use(sessions.Sessions("cat_session", store))
@@ -29,8 +30,7 @@ func init() {
 	// Group v1 non auth
 	v1.POST("/user/login", userController.PostUserLogin)
 	// Group v1 auth
-	auth := v1.Group("/auth")
-	auth.Use(middleware.GetHandlerFunc(authMiddleware))
+	auth := v1.Use(middleware.GetHandlerFunc(authMiddleware))
 	auth.GET("/user/info", userController.GetUserInfo)
 	auth.GET("/user/avatar", userController.GetUserAvatar)
 	auth.POST("/user/avatar", userController.PostUserAvatar)

@@ -4,8 +4,10 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/go-xorm/xorm"
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"log"
+	"os"
 )
 
 const (
@@ -13,25 +15,30 @@ const (
 	dbName     = "cat"
 )
 
-var (
-	host     = "192.168.99.100"
-	port     = "5432"
-	user     = "postgres"
-	password = "password"
-	//host     = os.Getenv("POSTGRES_HOST")
-	//port     = os.Getenv("POSTGRES_PORT")
-	//user     = os.Getenv("POSTGRES_USER")
-	//password = os.Getenv("POSTGRES_PASSWORD")
-)
+var host, port, user, password string
 
 func init() {
+	initialEnv()
 	createDatabase()
 	dataSource := getDataSource()
 	engine := getDBEngine(dataSource)
-	err := engine.Sync2(new(User))
+	err := engine.Sync2(new(Users), new(Cat), new(CatThumbnail))
 	if err != nil {
 		log.Fatalln(err)
 	}
+}
+
+func initialEnv() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Println("Error loading .env file")
+	} else {
+		log.Println("loading .env file success")
+	}
+	host = os.Getenv("POSTGRES_HOST")
+	port = os.Getenv("POSTGRES_PORT")
+	user = os.Getenv("POSTGRES_USER")
+	password = os.Getenv("POSTGRES_PASSWORD")
 }
 
 func createDatabase() {
@@ -40,10 +47,17 @@ func createDatabase() {
 		panic(err)
 	}
 	defer db.Close()
-	_, err = db.Exec("select count(*) from pg_catalog.pg_database where datname = '" + dbName+"'")
+	row := db.QueryRow("SELECT EXISTS(SELECT datname FROM pg_catalog.pg_database WHERE datname = $1)", dbName)
+	var exists bool
+	err = row.Scan(&exists)
 	if err != nil {
-		log.Println(err)
-		_, err = db.Exec("CREATE DATABASE '" + dbName+"'")
+		panic(err)
+	}
+	if exists {
+		log.Println("DATABASE EXIST,CONNECT DATABASE")
+	} else {
+		log.Println("DATABASE DOES NOT EXIST,CREATE DATABASE")
+		_, err = db.Exec("CREATE DATABASE " + dbName)
 		if err != nil {
 			panic(err)
 		}
