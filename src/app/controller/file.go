@@ -9,11 +9,11 @@ import (
 type FileController struct {
 }
 
-func (controller *UserController) serveBinaryFile(context *gin.Context, data []byte) {
+func (controller *FileController) serveBinaryFile(context *gin.Context, data []byte) {
 	context.Data(http.StatusOK, "image/jpeg", data)
 }
 
-func (controller *UserController) getBinaryFile(context *gin.Context) ([]byte, error) {
+func (controller *FileController) getBinaryFile(context *gin.Context) ([]byte, error) {
 	body := context.Request.Body
 	return ioutil.ReadAll(body)
 }

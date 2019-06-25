@@ -10,6 +10,7 @@ import (
 
 var Router *gin.Engine
 var userController = &controller.UserController{}
+var catController = &controller.CatController{}
 //middleware
 var authMiddleware = &middleware.AuthMiddleware{}
 
@@ -34,6 +35,10 @@ func init() {
 	auth.GET("/user/info", userController.GetUserInfo)
 	auth.GET("/user/avatar", userController.GetUserAvatar)
 	auth.POST("/user/avatar", userController.PostUserAvatar)
+
+	auth.POST("/cat", catController.PostCat)
+	auth.POST("/cat/:catId", catController.PostCatThumbnail)
+	auth.GET("/cat/:catId", catController.GetCatThumbnail)
 	//router.POST("/somePost", posting)
 	//router.PUT("/somePut", putting)
 	//router.DELETE("/someDelete", deleting)

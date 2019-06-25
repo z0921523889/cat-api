@@ -3,9 +3,9 @@ package orm
 import (
 	"database/sql"
 	"fmt"
-	"github.com/go-xorm/xorm"
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/joho/godotenv"
-	_ "github.com/lib/pq"
 	"log"
 	"os"
 )
@@ -16,16 +16,14 @@ const (
 )
 
 var host, port, user, password string
+var Engine *gorm.DB
 
 func init() {
 	initialEnv()
-	createDatabase()
-	dataSource := getDataSource()
-	engine := getDBEngine(dataSource)
-	err := engine.Sync2(new(Users), new(Cat), new(CatThumbnail))
-	if err != nil {
-		log.Fatalln(err)
-	}
+	//createDatabase()
+	connectDBEngine()
+	Engine.AutoMigrate(new(Users), new(Cat), new(CatThumbnails))
+	Engine.LogMode(true)
 }
 
 func initialEnv() {
@@ -63,21 +61,12 @@ func createDatabase() {
 		}
 	}
 }
-func getDataSource() string {
-	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbName)
-}
 
-func getDBEngine(dataSource string) *xorm.Engine {
-	engine, err := xorm.NewEngine(driverName, dataSource)
+func connectDBEngine() {
+	var err error
+	dataSource := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbName)
+	Engine, err = gorm.Open(driverName, dataSource)
 	if err != nil {
-		log.Fatal(err)
-		return nil
+		panic(err)
 	}
-	err = engine.Ping()
-	if err != nil {
-		log.Fatal(err)
-		return nil
-	}
-	fmt.Println("connect postgresql success")
-	return engine
 }

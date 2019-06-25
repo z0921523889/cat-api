@@ -1,22 +1,33 @@
 package orm
 
+import (
+	"github.com/jinzhu/gorm"
+)
+
 type Users struct {
-	Id               int64  `xorm:"int64 autoincr pk 'id'"`
-	Name             string `xorm:"varchar(25) notnull unique 'usr_name'"`
-	Phone            string `xorm:"varchar(15) notnull unique 'phone'"`
-	Password         string `xorm:"varchar(25) notnull unique 'password'"`
-	SecurityPassword string `xorm:"varchar(25) notnull unique 'security_password'"`
-	CreateAt         string `xorm:"notnull created 'create_at'"`
-	UpdateAt         string `xorm:"notnull updated 'update_at'"`
-	DeleteAt         string `xorm:"notnull deleted 'delete_at'"`
+	gorm.Model
+	Name             string `gorm:"type:varchar(25);not null;unique;column:usr_name"`
+	Phone            string `gorm:"type:varchar(15);not null;unique;column:phone"`
+	Password         string `gorm:"type:varchar(25);not null;unique;column:password"`
+	SecurityPassword string `gorm:"type:varchar(25);not null;unique;column:security_password"`
 }
 
 type Cat struct {
-	Id int64
-	Name             string `xorm:"varchar(25) notnull unique 'name'"`
-
+	gorm.Model
+	Name             string `gorm:"type:varchar(25);not null;column:name"`
+	Level            string `gorm:"type:varchar(25);not null;column:level"`
+	Price            int64  `gorm:"type:integer;not null;column:price"`
+	PetCoin          int64  `gorm:"type:integer;not null;column:pet_coin"`
+	ReservationPrice int64  `gorm:"type:integer;not null;column:reservation_price"`
+	AdoptionPrice    int64  `gorm:"type:integer;not null;column:adoption_price"`
+	ContractDays     int64  `gorm:"type:integer;not null;column:contract_days"`
+	ContractBenefit  int64  `gorm:"type:integer;not null;column:contract_benefit"`
+	Status           int64  `gorm:"type:integer;not null;column:status"`
+	CatThumbnailId   uint   `gorm:"type:integer;column:cat_thumbnail_id"`
 }
 
-type CatThumbnail struct {
-	Id int64
+type CatThumbnails struct {
+	gorm.Model
+	Data    []byte `gorm:"type:bytea;column:data"`
+	CatList []Cat  `gorm:"foreignkey:CatThumbnailId"`
 }
