@@ -2,6 +2,7 @@ package orm
 
 import (
 	"github.com/jinzhu/gorm"
+	"time"
 )
 
 type Users struct {
@@ -22,12 +23,25 @@ type Cat struct {
 	AdoptionPrice    int64  `gorm:"type:integer;not null;column:adoption_price"`
 	ContractDays     int64  `gorm:"type:integer;not null;column:contract_days"`
 	ContractBenefit  int64  `gorm:"type:integer;not null;column:contract_benefit"`
-	Status           int64  `gorm:"type:integer;not null;column:status"`
-	CatThumbnailId   uint   `gorm:"type:integer;column:cat_thumbnail_id"`
+	//state:        待放養 : 0 /預約中 : 1 /繁殖中 : 2 /收養中 : 3
+	Status         int64 `gorm:"type:integer;not null;column:status"`
+	CatThumbnailId uint  `gorm:"type:integer;column:cat_thumbnail_id"`
 }
 
 type CatThumbnails struct {
 	gorm.Model
 	Data    []byte `gorm:"type:bytea;column:data"`
 	CatList []Cat  `gorm:"foreignkey:CatThumbnailId"`
+}
+
+type AdoptionTimePeriod struct {
+	gorm.Model
+	StartAt time.Time `gorm:"not null;column:start_time"`
+	EndAt   time.Time `gorm:"not null;column:end_time"`
+}
+
+type Sessions struct {
+	Token  string    `gorm:"type:text;primary_key;column:token"`
+	Data   []byte    `gorm:"type:bytea;not null;column:data"`
+	Expiry time.Time `gorm:"not null;column:expiry"`
 }

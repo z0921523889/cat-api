@@ -1,0 +1,91 @@
+basePath: '{{.BasePath}}'
+definitions:
+  controller.Message:
+    properties:
+      message:
+        example: message
+        type: string
+    type: object
+  httputil.HTTPError:
+    properties:
+      code:
+        example: 400
+        type: integer
+      message:
+        example: status bad request
+        type: string
+    type: object
+host: '{{.Host}}'
+info:
+  contact: {}
+  description: '{{.Description}}'
+  license: {}
+  title: '{{.Title}}'
+  version: '{{.Version}}'
+paths:
+  /api/v1/cat:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Add a new cat
+      parameters:
+      - description: 貓的名稱
+        in: formData
+        name: name
+        required: true
+        type: string
+      - description: 貓的級別
+        in: formData
+        name: level
+        required: true
+        type: string
+      - description: 貓的價格
+        in: formData
+        name: price
+        required: true
+        type: string
+      - description: 貓的pet幣
+        in: formData
+        name: pet_coin
+        required: true
+        type: string
+      - description: 貓的預約價格
+        in: formData
+        name: reservation_price
+        required: true
+        type: string
+      - description: 貓的即搶價格
+        in: formData
+        name: adoption_price
+        required: true
+        type: string
+      - description: 貓的合約時間
+        in: formData
+        name: contract_days
+        required: true
+        type: string
+      - description: 貓的合約增益
+        in: formData
+        name: contract_benefit
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.Message'
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+            type: object
+      summary: Add new cat to the database
+swagger: "2.0"

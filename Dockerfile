@@ -10,7 +10,11 @@ RUN mkdir -p $GOPATH/src/cat-api
 WORKDIR $GOPATH/src/cat-api
 COPY . .
 
+RUN go get -u github.com/swaggo/swag/cmd/swag
+
 RUN go get -d -v ./src/run/...
+
+RUN swag init -d ./src/app/router -g router.go
 
 RUN go build -o /app ./src/run/main.go
 

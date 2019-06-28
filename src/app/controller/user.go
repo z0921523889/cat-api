@@ -1,8 +1,10 @@
 package controller
 
 import (
+	"fmt"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"github.com/swaggo/swag/example/celler/httputil"
 	"net/http"
 )
 
@@ -12,39 +14,17 @@ type UserController struct {
 	FileController
 }
 
-type response struct {
-	Error    bool   `json:"error"`
-	Message  string `json:"message"`
-	FuncName string `json:"func_name"`
-	Data     interface{}
-}
-
 func (controller *UserController) GetUserInfo(context *gin.Context) {
-	re := response{
-		Error:    false,
-		Message:  "nothing",
-		FuncName: "GetUserInfo",
-	}
-	context.JSON(http.StatusOK, re)
+	session := sessions.Default(context)
+	login := session.Get("user_login")
+	context.JSON(http.StatusOK, Message{Message: fmt.Sprintf("login state : %t", login)})
 }
 
 func (controller *UserController) PostUserLogin(context *gin.Context) {
-	var re response
 	session := sessions.Default(context)
 	session.Set("user_login", true)
-	err := session.Save()
-	if err != nil {
-		re = response{
-			Error:   true,
-			Message: "session save fail",
-		}
-	} else {
-		re = response{
-			Error:   false,
-			Message: "nothing",
-		}
-	}
-	context.JSON(http.StatusOK, re)
+	session.Save()
+	context.JSON(http.StatusOK, Message{Message: fmt.Sprintf("login success")})
 }
 
 func (controller *UserController) GetUserAvatar(context *gin.Context) {
@@ -55,11 +35,8 @@ func (controller *UserController) PostUserAvatar(context *gin.Context) {
 	data, err := controller.getBinaryFile(context)
 	pic = data
 	if err != nil {
-		context.AbortWithError(500, err)
+		httputil.NewError(context, http.StatusBadRequest, err)
+		return
 	}
-	re := response{
-		Error:   false,
-		Message: "nothing",
-	}
-	context.JSON(http.StatusOK, re)
+	context.JSON(http.StatusOK, Message{Message: fmt.Sprintf("post user avatar success")})
 }
