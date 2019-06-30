@@ -7,10 +7,12 @@ import (
 )
 
 var (
-	Port     string
-	User     string
-	Password string
-	Host     string
+	ApplicationHost  string
+	ApplicationPort  string
+	PostgresHost     string
+	PostgresPort     string
+	PostgresUser     string
+	PostgresPassword string
 )
 
 func LoadEnv() {
@@ -20,8 +22,10 @@ func LoadEnv() {
 	} else {
 		log.Println("loading .env file success")
 	}
-	Host = os.Getenv("POSTGRES_HOST")
-	Port = os.Getenv("POSTGRES_PORT")
-	User = os.Getenv("POSTGRES_USER")
-	Password = os.Getenv("POSTGRES_PASSWORD")
+	ApplicationHost = os.Getenv("APPLICATION_HOST")
+	ApplicationPort = os.Getenv("APPLICATION_PORT")
+	PostgresHost = os.Getenv("POSTGRES_HOST")
+	PostgresPort = os.Getenv("POSTGRES_PORT")
+	PostgresUser = os.Getenv("POSTGRES_USER")
+	PostgresPassword = os.Getenv("POSTGRES_PASSWORD")
 }

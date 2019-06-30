@@ -32,7 +32,7 @@ func (controller *UserController) GetUserAvatar(context *gin.Context) {
 }
 
 func (controller *UserController) PostUserAvatar(context *gin.Context) {
-	data, err := controller.getBinaryFile(context)
+	data, err := controller.getBinaryDataFromBody(context)
 	pic = data
 	if err != nil {
 		httputil.NewError(context, http.StatusBadRequest, err)

@@ -5,6 +5,17 @@ import (
 	"time"
 )
 
+type Sessions struct {
+	Token  string    `gorm:"type:text;primary_key;column:token"`
+	Data   []byte    `gorm:"type:bytea;not null;column:data"`
+	Expiry time.Time `gorm:"not null;column:expiry"`
+}
+
+type ApplicationConfig struct {
+	Key   string `gorm:"type:text;primary_key;column:key"`
+	Value string `gorm:"type:text;column:value"`
+}
+
 type Users struct {
 	gorm.Model
 	Name             string `gorm:"type:varchar(25);not null;unique;column:usr_name"`
@@ -40,8 +51,8 @@ type AdoptionTimePeriod struct {
 	EndAt   time.Time `gorm:"not null;column:end_time"`
 }
 
-type Sessions struct {
-	Token  string    `gorm:"type:text;primary_key;column:token"`
-	Data   []byte    `gorm:"type:bytea;not null;column:data"`
-	Expiry time.Time `gorm:"not null;column:expiry"`
+type AdoptionTimePeriodCatPivot struct {
+	gorm.Model
+	CatId                uint `gorm:"type:integer;column:cat_id"`
+	AdoptionTimePeriodId uint `gorm:"type:integer;column:adoption_time_period_id"`
 }

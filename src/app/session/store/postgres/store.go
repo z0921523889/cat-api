@@ -10,9 +10,12 @@ type Store struct {
 	*SessionPostgresStore
 }
 
-func NewPostgresStore(keyPairs ...[]byte) *Store {
-	s := newPostgresStore(keyPairs...)
-	return &Store{s}
+func NewPostgresStore(keyPairs ...[]byte) (*Store, error) {
+	s, err := newPostgresStore(keyPairs...)
+	if err != nil {
+		return nil, err
+	}
+	return &Store{s}, nil
 }
 
 func (store *Store) Options(options sessions.Options) {

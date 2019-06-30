@@ -16,13 +16,17 @@ var Engine *gorm.DB
 
 func ConnectDBEngine() {
 	var err error
-	dataSource := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", env.Host, env.Port, env.User, env.Password, dbName)
+	dataSource := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", env.PostgresHost, env.PostgresPort, env.PostgresUser, env.PostgresPassword, dbName)
 	Engine, err = gorm.Open(driverName, dataSource)
 	if err != nil {
 		panic(err)
 	}
 	Engine.DB().SetMaxIdleConns(10)
-	Engine.AutoMigrate(new(Users), new(Cat), new(CatThumbnails),new(Sessions))
+	Engine.AutoMigrate(
+		new(Sessions), new(ApplicationConfig),
+		new(Users),
+		new(Cat), new(CatThumbnails),
+		new(AdoptionTimePeriod), new(AdoptionTimePeriodCatPivot))
 	Engine.LogMode(true)
 }
 

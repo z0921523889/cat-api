@@ -132,7 +132,16 @@ func (store *SessionPostgresStore) delete(session *sessions.Session) error {
 	return nil
 }
 
-func newPostgresStore(keyPairs ...[]byte) *SessionPostgresStore {
+// ping does an internal ping against a server to check if it is alive.
+func (store *SessionPostgresStore) ping() (bool, error) {
+	err := orm.Engine.DB().Ping()
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+func newPostgresStore(keyPairs ...[]byte) (*SessionPostgresStore, error) {
 	rs := &SessionPostgresStore{
 		Codecs: securecookie.CodecsFromPairs(keyPairs...),
 		Options: &sessions.Options{
@@ -144,5 +153,6 @@ func newPostgresStore(keyPairs ...[]byte) *SessionPostgresStore {
 		keyPrefix:     "session_",
 		serializer:    GobSerializer{},
 	}
-	return rs
+	_, err := rs.ping()
+	return rs, err
 }

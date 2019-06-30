@@ -14,7 +14,7 @@ RUN go get -u github.com/swaggo/swag/cmd/swag
 
 RUN go get -d -v ./src/run/...
 
-RUN swag init -d ./src/app/router -g router.go
+RUN swag init -d ./src/app/router -g router.go -o ./src/app/docs
 
 RUN go build -o /app ./src/run/main.go
 
@@ -24,6 +24,6 @@ RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
 
 COPY --from=builder /app .
 
-EXPOSE 80
+EXPOSE 8085
 
 ENTRYPOINT ["./app"]

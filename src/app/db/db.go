@@ -8,12 +8,12 @@ import (
 )
 
 const (
-	driverName        = "postgres"
-	dbName            = "cat"
+	driverName = "postgres"
+	dbName     = "cat"
 )
 
 func InitDataBase() {
-	db, err := sql.Open(driverName, fmt.Sprintf("host=%s port=%s user=%s password=%s sslmode=disable", env.Host, env.Port, env.User, env.Password))
+	db, err := sql.Open(driverName, fmt.Sprintf("host=%s port=%s user=%s password=%s sslmode=disable", env.PostgresHost, env.PostgresPort, env.PostgresUser, env.PostgresPassword))
 	if err != nil {
 		panic(err)
 	}
