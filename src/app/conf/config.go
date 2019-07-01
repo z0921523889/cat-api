@@ -11,6 +11,7 @@ var DefaultConfig map[string]string
 func init() {
 	DefaultConfig = make(map[string]string)
 	DefaultConfig["TimePeriodMaxCatAmount"] = "5"
+	DefaultConfig["TimePeriodTemplateAdminId"] = "1"
 }
 
 func CheckDataBaseConfig() {

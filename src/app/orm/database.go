@@ -16,6 +16,12 @@ type ApplicationConfig struct {
 	Value string `gorm:"type:text;column:value"`
 }
 
+type Admins struct {
+	gorm.Model
+	Name     string `gorm:"type:varchar(25);not null;unique;column:usr_name"`
+	Password string `gorm:"type:varchar(25);not null;unique;column:password"`
+}
+
 type Users struct {
 	gorm.Model
 	Name             string `gorm:"type:varchar(25);not null;unique;column:usr_name"`
@@ -43,6 +49,13 @@ type CatThumbnails struct {
 	gorm.Model
 	Data    []byte `gorm:"type:bytea;column:data"`
 	CatList []Cat  `gorm:"foreignkey:CatThumbnailId"`
+}
+
+type AdminTimePeriodTemplate struct {
+	gorm.Model
+	AdminId uint `gorm:"type:integer;column:admin_id"`
+	StartAt time.Time `gorm:"not null;column:start_time"`
+	EndAt   time.Time `gorm:"not null;column:end_time"`
 }
 
 type AdoptionTimePeriod struct {

@@ -24,10 +24,12 @@ func ConnectDBEngine() {
 	Engine.DB().SetMaxIdleConns(10)
 	Engine.AutoMigrate(
 		new(Sessions), new(ApplicationConfig),
+		new(Admins),
 		new(Users),
 		new(Cat), new(CatThumbnails),
-		new(AdoptionTimePeriod), new(AdoptionTimePeriodCatPivot))
+		new(AdminTimePeriodTemplate), new(AdoptionTimePeriod), new(AdoptionTimePeriodCatPivot))
 	Engine.LogMode(true)
+	CheckDefaultAdmin()
 }
 
 func CloseDBEngine() error {

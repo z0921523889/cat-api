@@ -7,6 +7,7 @@ import (
 	"cat-api/src/app/env"
 	"cat-api/src/app/orm"
 	"cat-api/src/app/router"
+	"cat-api/src/app/schedule"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
 	"log"
@@ -27,6 +28,9 @@ func StartServer() {
 	routerEngine := router.InitialRouterEngine()
 	if env.SwaggerDocEnable {
 		routerEngine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	}
+	if env.ScheduleJobEnable{
+		schedule.StartScheduleJobs()
 	}
 	err := routerEngine.Run(":" + env.ApplicationPort)
 	if err != nil {

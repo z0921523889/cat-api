@@ -15,4 +15,4 @@
 .env
 
 # docker compose
-./docker-compose.yml
+docker-compose.yml
