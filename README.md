@@ -1,11 +1,22 @@
 
+#### build swagger doc:
+    go get -u github.com/swaggo/swag/cmd/swag
+    swag init -d ./src/app/router -g router.go -o ./src/app/docs
+
 #### Build Docker Image:
     cd ./
-    docker build -t cat-api:0.0.0
+    docker build -t cat-api
+    
+#### Copy .env.example as .env file ####
+    cp .env.example .env    
+    
+## run Docker Image
 
-#### run Docker Image
-## windows escape character is ` linux,mac is \
+#### use Docker run
     docker run -i --env-file=.env.example -p 8085:8085 -t cat-api:0.0.0
 
-#### Copy .env.example as .env file ####
-    cp .env.example .env
+#### Use Docker Compose
+    cp .docker-compose.yml.example .docker-compose.yml
+    change POSTGRES_HOST=db
+    docker network create app_net
+    docker-compose up -d

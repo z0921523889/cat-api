@@ -1,17 +1,16 @@
 package app
 
 import (
-	_ "cat-api/docs"
 	"cat-api/src/app/conf"
 	"cat-api/src/app/db"
+	_ "cat-api/src/app/docs"
 	"cat-api/src/app/env"
 	"cat-api/src/app/orm"
 	"cat-api/src/app/router"
-	"github.com/swaggo/gin-swagger"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
 	"log"
 )
-
 
 // @title Golang Gin API
 // @version 1.0
@@ -26,7 +25,9 @@ func StartServer() {
 	defer orm.CloseDBEngine()
 	conf.CheckDataBaseConfig()
 	routerEngine := router.InitialRouterEngine()
-	routerEngine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	if env.SwaggerDocEnable {
+		routerEngine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	}
 	err := routerEngine.Run(":" + env.ApplicationPort)
 	if err != nil {
 		log.Println(err)
