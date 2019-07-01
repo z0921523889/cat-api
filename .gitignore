@@ -14,6 +14,5 @@
 # env file
 .env
 
-# test
-./test/*
-
+# docker compose
+./docker-compose.yml
