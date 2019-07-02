@@ -11,15 +11,16 @@ type Sessions struct {
 	Expiry time.Time `gorm:"not null;column:expiry"`
 }
 
-type ApplicationConfig struct {
+type ApplicationConfigs struct {
 	Key   string `gorm:"type:text;primary_key;column:key"`
 	Value string `gorm:"type:text;column:value"`
 }
 
 type Admins struct {
 	gorm.Model
-	Name     string `gorm:"type:varchar(25);not null;unique;column:usr_name"`
-	Password string `gorm:"type:varchar(25);not null;unique;column:password"`
+	Account                     string                     `gorm:"type:varchar(25);not null;unique;column:account"`
+	Password                    string                     `gorm:"type:varchar(25);not null;unique;column:password"`
+	AdminTimePeriodTemplateList []AdminTimePeriodTemplates `gorm:"foreignkey:AdminId"`
 }
 
 type Users struct {
@@ -30,7 +31,7 @@ type Users struct {
 	SecurityPassword string `gorm:"type:varchar(25);not null;unique;column:security_password"`
 }
 
-type Cat struct {
+type Cats struct {
 	gorm.Model
 	Name             string `gorm:"type:varchar(25);not null;column:name"`
 	Level            string `gorm:"type:varchar(25);not null;column:level"`
@@ -40,32 +41,33 @@ type Cat struct {
 	AdoptionPrice    int64  `gorm:"type:integer;not null;column:adoption_price"`
 	ContractDays     int64  `gorm:"type:integer;not null;column:contract_days"`
 	ContractBenefit  int64  `gorm:"type:integer;not null;column:contract_benefit"`
-	//state:        待放養 : 0 /預約中 : 1 /繁殖中 : 2 /收養中 : 3
-	Status         int64 `gorm:"type:integer;not null;column:status"`
-	CatThumbnailId uint  `gorm:"type:integer;column:cat_thumbnail_id"`
+	//state:        待售中 : 0 /預約中 : 1 /確認交易 :2 / 待交貨 : 3 /收養中 : 4
+	Status              int64                 `gorm:"type:integer;not null;column:status"`
+	CatThumbnailId      uint                  `gorm:"type:integer;column:cat_thumbnail_id"`
+	AdoptionTimePeriods []AdoptionTimePeriods `gorm:"many2many:adoption_time_period_cat_pivot"`
 }
 
 type CatThumbnails struct {
 	gorm.Model
-	Data    []byte `gorm:"type:bytea;column:data"`
-	CatList []Cat  `gorm:"foreignkey:CatThumbnailId"`
+	Data []byte `gorm:"type:bytea;column:data"`
 }
 
-type AdminTimePeriodTemplate struct {
+type AdminTimePeriodTemplates struct {
 	gorm.Model
-	AdminId uint `gorm:"type:integer;column:admin_id"`
+	AdminId uint      `gorm:"type:integer;column:admin_id"`
 	StartAt time.Time `gorm:"not null;column:start_time"`
 	EndAt   time.Time `gorm:"not null;column:end_time"`
 }
 
-type AdoptionTimePeriod struct {
+type AdoptionTimePeriods struct {
 	gorm.Model
 	StartAt time.Time `gorm:"not null;column:start_time"`
 	EndAt   time.Time `gorm:"not null;column:end_time"`
+	Cats    []Cats    `gorm:"many2many:adoption_time_period_cat_pivots"`
 }
 
-type AdoptionTimePeriodCatPivot struct {
+type AdoptionTimePeriodCatPivots struct {
 	gorm.Model
-	CatId                uint `gorm:"type:integer;column:cat_id"`
-	AdoptionTimePeriodId uint `gorm:"type:integer;column:adoption_time_period_id"`
+	CatsId                uint `gorm:"type:integer;column:cats_id"`
+	AdoptionTimePeriodsId uint `gorm:"type:integer;column:adoption_time_periods_id"`
 }

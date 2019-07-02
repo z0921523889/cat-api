@@ -10,6 +10,8 @@ definitions:
         type: integer
       contract_days:
         type: integer
+      id:
+        type: integer
       level:
         type: string
       name:
@@ -21,7 +23,53 @@ definitions:
       reservation_price:
         type: integer
     type: object
-  controller.GetCatResponse:
+  controller.CatThumbnailItem:
+    properties:
+      cat_thumbnail_path:
+        type: string
+      id:
+        type: integer
+    type: object
+  controller.GetCatListResponse:
+    properties:
+      cats:
+        items:
+          $ref: '#/definitions/controller.CatItem'
+        type: array
+      lower:
+        type: integer
+      total:
+        type: integer
+      upper:
+        type: integer
+    type: object
+  controller.GetCatThumbnailListResponse:
+    properties:
+      cat_thumbnails:
+        items:
+          $ref: '#/definitions/controller.CatThumbnailItem'
+        type: array
+      lower:
+        type: integer
+      total:
+        type: integer
+      upper:
+        type: integer
+    type: object
+  controller.GetTimePeriodResponse:
+    properties:
+      lower:
+        type: integer
+      time_periods:
+        items:
+          $ref: '#/definitions/controller.TimePeriodItem'
+        type: array
+      total:
+        type: integer
+      upper:
+        type: integer
+    type: object
+  controller.GetTimeScheduleCatResponse:
     properties:
       cats:
         items:
@@ -38,6 +86,19 @@ definitions:
     properties:
       message:
         example: message
+        type: string
+    type: object
+  controller.TimePeriodItem:
+    properties:
+      cats:
+        items:
+          $ref: '#/definitions/controller.CatItem'
+        type: array
+      end_at:
+        type: string
+      id:
+        type: integer
+      start_at:
         type: string
     type: object
   httputil.HTTPError:
@@ -58,44 +119,6 @@ info:
   version: '{{.Version}}'
 paths:
   /api/v1/cat:
-    get:
-      consumes:
-      - application/json
-      description: get cat list with status from database
-      parameters:
-      - description: 貓列表的lower
-        in: query
-        name: lower
-        required: true
-        type: integer
-      - description: 貓列表的upper
-        in: query
-        name: upper
-        required: true
-        type: integer
-      - description: '貓列表的狀態(待放養 : 0/預約中 : 1/繁殖中 : 2/收養中 : 3)'
-        in: query
-        name: status
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/controller.GetCatResponse'
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/httputil.HTTPError'
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/httputil.HTTPError'
-            type: object
     post:
       consumes:
       - multipart/form-data
@@ -159,12 +182,119 @@ paths:
           schema:
             $ref: '#/definitions/httputil.HTTPError'
             type: object
-  /api/v1/cat/{catId}:
+  /api/v1/cat/thumbnail:
+    post:
+      consumes:
+      - multipart/form-data
+      description: insert or update cat thumbnail to the database
+      parameters:
+      - description: 貓的縮圖檔案
+        in: formData
+        name: thumbnail
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.Message'
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+            type: object
+  /api/v1/cat/thumbnails:
+    get:
+      consumes:
+      - application/json
+      description: get cat thumbnail list from the database
+      parameters:
+      - description: 貓縮圖列表的lower
+        in: query
+        name: lower
+        required: true
+        type: integer
+      - description: 貓縮圖列表的upper
+        in: query
+        name: upper
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.GetCatThumbnailListResponse'
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+            type: object
+  /api/v1/cats:
+    get:
+      consumes:
+      - application/json
+      description: get cat list with status from database
+      parameters:
+      - description: 貓列表的lower
+        in: query
+        name: lower
+        required: true
+        type: integer
+      - description: 貓列表的upper
+        in: query
+        name: upper
+        required: true
+        type: integer
+      - description: '貓列表的狀態(待放養 : 0/預約中 : 1/繁殖中 : 2/收養中 : 3)'
+        in: query
+        name: status
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.GetCatListResponse'
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+            type: object
+  /api/v1/cats/{catId}:
     put:
       consumes:
       - multipart/form-data
       description: modify cat information to the database
       parameters:
+      - description: 貓的ID
+        in: path
+        name: catId
+        required: true
+        type: integer
       - description: 貓的名稱
         in: formData
         name: name
@@ -228,7 +358,7 @@ paths:
           schema:
             $ref: '#/definitions/httputil.HTTPError'
             type: object
-  /api/v1/cat/{catId}/thumbnail:
+  /api/v1/thumbnail/cats/{catId}:
     get:
       consumes:
       - application/json
@@ -256,21 +386,22 @@ paths:
           schema:
             $ref: '#/definitions/httputil.HTTPError'
             type: object
-    post:
+  /api/v1/thumbnails/{thumbnailId}/cats/{catId}:
+    put:
       consumes:
-      - image/jpeg
-      description: insert or update cat thumbnail to the database
+      - application/json
+      description: link cat thumbnail with cat to the database
       parameters:
       - description: 貓的ID
         in: path
         name: catId
         required: true
         type: integer
-      - description: 貓的縮圖檔案
-        in: formData
-        name: thumbnail
+      - description: 貓的縮圖ID
+        in: path
+        name: thumbnailId
         required: true
-        type: File
+        type: integer
       produces:
       - application/json
       responses:
@@ -289,7 +420,7 @@ paths:
           schema:
             $ref: '#/definitions/httputil.HTTPError'
             type: object
-  /api/v1/time/period:
+  /api/v1/time/schedule:
     post:
       consumes:
       - multipart/form-data
@@ -305,6 +436,118 @@ paths:
         name: end_at
         required: true
         type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.Message'
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+            type: object
+  /api/v1/time/schedules:
+    get:
+      consumes:
+      - application/json
+      description: get timePeriod list with date
+      parameters:
+      - description: 時段列表的lower
+        in: query
+        name: lower
+        required: true
+        type: integer
+      - description: 時段列表的upper
+        in: query
+        name: upper
+        required: true
+        type: integer
+      - description: 時段列表的日期(yyyy-MM-dd)
+        in: query
+        name: date
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.GetTimePeriodResponse'
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+            type: object
+  /api/v1/time/schedules/{scheduleId}:
+    get:
+      consumes:
+      - application/json
+      description: get cat list with timeSchedule from database
+      parameters:
+      - description: 時段的ID
+        in: path
+        name: scheduleId
+        required: true
+        type: integer
+      - description: 貓列表的lower
+        in: query
+        name: lower
+        required: true
+        type: integer
+      - description: 貓列表的upper
+        in: query
+        name: upper
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.GetTimeScheduleCatResponse'
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+            type: object
+  /api/v1/time/schedules/{scheduleId}/cat/{catId}:
+    post:
+      consumes:
+      - application/json
+      description: Add a new timePeriodCatPivot
+      parameters:
+      - description: 貓的ID
+        in: path
+        name: catId
+        required: true
+        type: integer
+      - description: 時段的ID
+        in: path
+        name: scheduleId
+        required: true
+        type: integer
       produces:
       - application/json
       responses:

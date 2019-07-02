@@ -8,12 +8,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+var adminController = &controller.AdminController{}
 var userController = &controller.UserController{}
 var catController = &controller.CatController{}
 var catThumbnailController = &controller.CatThumbnailController{}
-var timePeriodController = &controller.TimePeriodController{}
+var timePeriodController = &controller.TimeScheduleController{}
 //middleware
-var authMiddleware = &middleware.AuthMiddleware{}
+var userAuthMiddleware = &middleware.UserAuthMiddleware{}
+var adminMiddleware = &middleware.AdminAuthMiddleware{}
 
 func InitialRouterEngine() *gin.Engine {
 	router := gin.Default()
@@ -31,19 +33,28 @@ func InitialRouterEngine() *gin.Engine {
 	v1 := router.Group("api/v1")
 	// Group v1 non auth
 	v1.POST("/user/login", userController.PostUserLogin)
-	// Group v1 auth
-	auth := v1.Use(middleware.GetHandlerFunc(authMiddleware))
-	auth.GET("/user/info", userController.GetUserInfo)
-	auth.GET("/user/avatar", userController.GetUserAvatar)
-	auth.POST("/user/avatar", userController.PostUserAvatar)
-
-	auth.GET("/cat", catController.GetCat)
-	auth.POST("/cat", catController.PostCat)
-	auth.PUT("/cat/:catId", catController.PutModifyCat)
-	auth.GET("/cat/:catId/thumbnail", catThumbnailController.GetCatThumbnail)
-	auth.POST("/cat/:catId/thumbnail", catThumbnailController.PostCatThumbnail)
-
-	auth.POST("/time/period", timePeriodController.PostTimePeriod)
-
+	v1.POST("/admin/login", adminController.PostAdminLogin)
+	// Group admin auth
+	adminAuth := v1.Use(middleware.GetHandlerFunc(adminMiddleware))
+	//cat
+	adminAuth.POST("/cat", catController.PostCat)
+	adminAuth.PUT("/cats/:catId", catController.PutModifyCat)
+	adminAuth.POST("/cat/thumbnail", catThumbnailController.PostCatThumbnail)
+	adminAuth.PUT("/thumbnails/:thumbnailId/cats/:catId", catThumbnailController.PutModifyCatThumbnail)
+	//schedules
+	adminAuth.POST("/time/schedule", timePeriodController.PostTimeSchedule)
+	adminAuth.POST("/time/schedules/:scheduleId/cat/:catId", timePeriodController.PostTimeScheduleCat)
+	// Group user auth
+	userAuth := v1.Use(middleware.GetHandlerFunc(userAuthMiddleware))
+	userAuth.GET("/user/info", userController.GetUserInfo)
+	userAuth.GET("/user/avatar", userController.GetUserAvatar)
+	userAuth.POST("/user/avatar", userController.PostUserAvatar)
+	//cat
+	userAuth.GET("/cats", catController.GetCatList)
+	userAuth.GET("/cat/thumbnails", catThumbnailController.GetCatThumbnailList)
+	userAuth.GET("/thumbnail/cats/:catId", catThumbnailController.GetCatThumbnail)
+	//schedules
+	userAuth.GET("/time/schedules", timePeriodController.GetTimeScheduleList)
+	userAuth.GET("/time/schedules/:scheduleId", timePeriodController.GetTimeScheduleCat)
 	return router
 }

@@ -16,11 +16,11 @@ func init() {
 
 func CheckDataBaseConfig() {
 	for key, value := range DefaultConfig {
-		var config orm.ApplicationConfig
+		var config orm.ApplicationConfigs
 		err := orm.Engine.First(&config, "key = ?", key).Error
 		if err != nil {
 			if err == gorm.ErrRecordNotFound {
-				config = orm.ApplicationConfig{
+				config = orm.ApplicationConfigs{
 					Key:   key,
 					Value: value,
 				}
@@ -34,7 +34,7 @@ func CheckDataBaseConfig() {
 		log.Println("config data already exist")
 	}
 
-	var configs []orm.ApplicationConfig
+	var configs []orm.ApplicationConfigs
 	err := orm.Engine.Find(&configs).Error
 	if err != nil {
 		log.Fatalln("fail to find config data err : " + err.Error())

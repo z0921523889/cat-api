@@ -4,8 +4,14 @@ import (
 "github.com/gin-gonic/gin"
 )
 
-type AuthMiddleware struct{}
+type UserAuthMiddleware struct{}
 
-func (middleware *AuthMiddleware) Execute(context *gin.Context) {
+func (middleware *UserAuthMiddleware) Execute(context *gin.Context) {
+
+}
+
+type AdminAuthMiddleware struct{}
+
+func (middleware *AdminAuthMiddleware) Execute(context *gin.Context) {
 
 }

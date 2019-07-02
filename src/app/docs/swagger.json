@@ -11,61 +11,6 @@
     "basePath": "{{.BasePath}}",
     "paths": {
         "/api/v1/cat": {
-            "get": {
-                "description": "get cat list with status from database",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "貓列表的lower",
-                        "name": "lower",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "貓列表的upper",
-                        "name": "upper",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "貓列表的狀態(待放養 : 0/預約中 : 1/繁殖中 : 2/收養中 : 3)",
-                        "name": "status",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "$ref": "#/definitions/controller.GetCatResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "$ref": "#/definitions/httputil.HTTPError"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "$ref": "#/definitions/httputil.HTTPError"
-                        }
-                    }
-                }
-            },
             "post": {
                 "description": "Add a new cat",
                 "consumes": [
@@ -157,7 +102,157 @@
                 }
             }
         },
-        "/api/v1/cat/{catId}": {
+        "/api/v1/cat/thumbnail": {
+            "post": {
+                "description": "insert or update cat thumbnail to the database",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "貓的縮圖檔案",
+                        "name": "thumbnail",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/controller.Message"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/httputil.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/httputil.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/cat/thumbnails": {
+            "get": {
+                "description": "get cat thumbnail list from the database",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "貓縮圖列表的lower",
+                        "name": "lower",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "貓縮圖列表的upper",
+                        "name": "upper",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/controller.GetCatThumbnailListResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/httputil.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/httputil.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/cats": {
+            "get": {
+                "description": "get cat list with status from database",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "貓列表的lower",
+                        "name": "lower",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "貓列表的upper",
+                        "name": "upper",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "貓列表的狀態(待放養 : 0/預約中 : 1/繁殖中 : 2/收養中 : 3)",
+                        "name": "status",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/controller.GetCatListResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/httputil.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/httputil.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/cats/{catId}": {
             "put": {
                 "description": "modify cat information to the database",
                 "consumes": [
@@ -167,6 +262,13 @@
                     "application/json"
                 ],
                 "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "貓的ID",
+                        "name": "catId",
+                        "in": "path",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "貓的名稱",
@@ -256,7 +358,7 @@
                 }
             }
         },
-        "/api/v1/cat/{catId}/thumbnail": {
+        "/api/v1/thumbnail/cats/{catId}": {
             "get": {
                 "description": "get cat thumbnail from the database",
                 "consumes": [
@@ -296,11 +398,13 @@
                         }
                     }
                 }
-            },
-            "post": {
-                "description": "insert or update cat thumbnail to the database",
+            }
+        },
+        "/api/v1/thumbnails/{thumbnailId}/cats/{catId}": {
+            "put": {
+                "description": "link cat thumbnail with cat to the database",
                 "consumes": [
-                    "image/jpeg"
+                    "application/json"
                 ],
                 "produces": [
                     "application/json"
@@ -314,10 +418,10 @@
                         "required": true
                     },
                     {
-                        "type": "File",
-                        "description": "貓的縮圖檔案",
-                        "name": "thumbnail",
-                        "in": "formData",
+                        "type": "integer",
+                        "description": "貓的縮圖ID",
+                        "name": "thumbnailId",
+                        "in": "path",
                         "required": true
                     }
                 ],
@@ -346,7 +450,7 @@
                 }
             }
         },
-        "/api/v1/time/period": {
+        "/api/v1/time/schedule": {
             "post": {
                 "description": "Add a new timePeriod",
                 "consumes": [
@@ -395,6 +499,170 @@
                     }
                 }
             }
+        },
+        "/api/v1/time/schedules": {
+            "get": {
+                "description": "get timePeriod list with date",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "時段列表的lower",
+                        "name": "lower",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "時段列表的upper",
+                        "name": "upper",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "時段列表的日期(yyyy-MM-dd)",
+                        "name": "date",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/controller.GetTimePeriodResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/httputil.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/httputil.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/time/schedules/{scheduleId}": {
+            "get": {
+                "description": "get cat list with timeSchedule from database",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "時段的ID",
+                        "name": "scheduleId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "貓列表的lower",
+                        "name": "lower",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "貓列表的upper",
+                        "name": "upper",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/controller.GetTimeScheduleCatResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/httputil.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/httputil.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/time/schedules/{scheduleId}/cat/{catId}": {
+            "post": {
+                "description": "Add a new timePeriodCatPivot",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "貓的ID",
+                        "name": "catId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "時段的ID",
+                        "name": "scheduleId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/controller.Message"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/httputil.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/httputil.HTTPError"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -411,6 +679,9 @@
                     "type": "integer"
                 },
                 "contract_days": {
+                    "type": "integer"
+                },
+                "id": {
                     "type": "integer"
                 },
                 "level": {
@@ -430,7 +701,78 @@
                 }
             }
         },
-        "controller.GetCatResponse": {
+        "controller.CatThumbnailItem": {
+            "type": "object",
+            "properties": {
+                "cat_thumbnail_path": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "controller.GetCatListResponse": {
+            "type": "object",
+            "properties": {
+                "cats": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/controller.CatItem"
+                    }
+                },
+                "lower": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
+                },
+                "upper": {
+                    "type": "integer"
+                }
+            }
+        },
+        "controller.GetCatThumbnailListResponse": {
+            "type": "object",
+            "properties": {
+                "cat_thumbnails": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/controller.CatThumbnailItem"
+                    }
+                },
+                "lower": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
+                },
+                "upper": {
+                    "type": "integer"
+                }
+            }
+        },
+        "controller.GetTimePeriodResponse": {
+            "type": "object",
+            "properties": {
+                "lower": {
+                    "type": "integer"
+                },
+                "time_periods": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/controller.TimePeriodItem"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                },
+                "upper": {
+                    "type": "integer"
+                }
+            }
+        },
+        "controller.GetTimeScheduleCatResponse": {
             "type": "object",
             "properties": {
                 "cats": {
@@ -456,6 +798,26 @@
                 "message": {
                     "type": "string",
                     "example": "message"
+                }
+            }
+        },
+        "controller.TimePeriodItem": {
+            "type": "object",
+            "properties": {
+                "cats": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/controller.CatItem"
+                    }
+                },
+                "end_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "start_at": {
+                    "type": "string"
                 }
             }
         },

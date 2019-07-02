@@ -29,9 +29,9 @@ func CheckDefaultAdmin() {
 				log.Fatal("fail on create default admin")
 			}
 			for _, value := range list {
-				start, _ := format.ParseTime(value[0])
-				end, _ := format.ParseTime(value[1])
-				adminTimePeriodTemplate := AdminTimePeriodTemplate{
+				start, _ := format.ParseTime(value[0],format.TimeFormatter)
+				end, _ := format.ParseTime(value[1],format.TimeFormatter)
+				adminTimePeriodTemplate := AdminTimePeriodTemplates{
 					AdminId: 1,
 					StartAt: start,
 					EndAt:   end,

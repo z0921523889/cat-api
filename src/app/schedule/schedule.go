@@ -4,61 +4,71 @@ import (
 	"cat-api/src/app/conf"
 	"cat-api/src/app/orm"
 	"github.com/robfig/cron"
+	"log"
 	"strconv"
 	"time"
 )
 
 func StartScheduleJobs() {
 	c := cron.New()
-	c.AddFunc("@daily", generateTimePeriod)
+	c.AddFunc("@monthly", generateTimePeriod)
 	c.Start()
 }
 
 func generateTimePeriod() {
+	log.Println("run generateTimePeriod")
 	admin := orm.Admins{}
-	adminTimePeriodTemplate := orm.AdminTimePeriodTemplate{}
+	var templateList []orm.AdminTimePeriodTemplates
 	id, err := strconv.Atoi(conf.DefaultConfig["TimePeriodTemplateAdminId"])
 	if err != nil {
 		id = 1
 	}
-	var count int
-	orm.Engine.Table("adoption_time_period").Where("start_at > ?", time.Now()).Count(&count)
-	if count > 0 {
+	if err := orm.Engine.First(&admin, id).Related(&templateList, "AdminId").Error; err != nil {
 		return
 	}
-	if err := orm.Engine.First(&admin, id).Related(&adminTimePeriodTemplate, "AdminId").Error; err != nil {
-		monthLater := time.Now().AddDate(0, 1, 0)
+	monthLater := time.Now().AddDate(0, 1, 0)
+	session := orm.Engine.Begin()
+	for _, value := range templateList {
 		day := time.Now()
-		session := orm.Engine.Begin()
 		for monthLater.After(day) {
 			start := time.Date(
 				day.Year(),
 				day.Month(),
 				day.Day(),
-				adminTimePeriodTemplate.StartAt.Hour(),
-				adminTimePeriodTemplate.StartAt.Minute(),
-				adminTimePeriodTemplate.StartAt.Second(),
-				adminTimePeriodTemplate.StartAt.Nanosecond(),
-				adminTimePeriodTemplate.StartAt.Location(),
+				value.StartAt.Hour(),
+				value.StartAt.Minute(),
+				value.StartAt.Second(),
+				value.StartAt.Nanosecond(),
+				value.StartAt.Location(),
 			)
 			end := time.Date(
 				day.Year(),
 				day.Month(),
 				day.Day(),
-				adminTimePeriodTemplate.EndAt.Hour(),
-				adminTimePeriodTemplate.EndAt.Minute(),
-				adminTimePeriodTemplate.EndAt.Second(),
-				adminTimePeriodTemplate.EndAt.Nanosecond(),
-				adminTimePeriodTemplate.EndAt.Location(),
+				value.EndAt.Hour(),
+				value.EndAt.Minute(),
+				value.EndAt.Second(),
+				value.EndAt.Nanosecond(),
+				value.EndAt.Location(),
 			)
-			if err := session.Create(&orm.AdoptionTimePeriod{
-				StartAt: start,
-				EndAt:   end,
-			}).Error; err != nil {
-				session.Rollback()
+			day = day.AddDate(0, 0, 1)
+			if orm.Engine.
+				Where("start_time = ?", start).
+				Where("end_time = ?", end).
+				First(&orm.AdoptionTimePeriods{}).
+				RecordNotFound() {
+				if err := session.Create(&orm.AdoptionTimePeriods{
+					StartAt: start,
+					EndAt:   end,
+				}).Error; err != nil {
+					session.Rollback()
+				}
+				log.Println("data not exist --> create")
+			} else {
+				log.Println("data exist --> break")
+				continue
 			}
-			day.AddDate(0, 0, 1)
 		}
-		session.Commit()
 	}
+	session.Commit()
 }

@@ -45,7 +45,7 @@ func (controller *CatController) PostCat(context *gin.Context) {
 		httputil.NewError(context, http.StatusBadRequest, err)
 		return
 	}
-	cat := orm.Cat{
+	cat := orm.Cats{
 		Name:             request.Name,
 		Level:            request.Level,
 		Price:            request.Price,
@@ -63,74 +63,6 @@ func (controller *CatController) PostCat(context *gin.Context) {
 	context.JSON(http.StatusOK, Message{Message: fmt.Sprintf("insert cat complete catID=%d", cat.ID)})
 }
 
-type GetCatRequest struct {
-	ListRequest
-	Status int `form:"status" json:"status"`
-}
-
-type GetCatResponse struct {
-	ListResponse
-	Cats []CatItem `form:"cats" json:"cats"`
-}
-
-type CatItem struct {
-	Name             string `form:"pet_coin" json:"name"`
-	Level            string `form:"pet_coin" json:"level"`
-	Price            int64  `form:"pet_coin" json:"price"`
-	PetCoin          int64  `form:"pet_coin" json:"pet_coin"`
-	ReservationPrice int64  `form:"pet_coin" json:"reservation_price"`
-	AdoptionPrice    int64  `form:"pet_coin" json:"adoption_price"`
-	ContractDays     int64  `form:"pet_coin" json:"contract_days"`
-	ContractBenefit  int64  `form:"pet_coin" json:"contract_benefit"`
-	CatThumbnailPath string `form:"pet_coin" json:"cat_thumbnail_path"`
-}
-
-// @Description get cat list with status from database
-// @Accept json
-// @Produce json
-// @Param lower query int true "貓列表的lower"
-// @Param upper query int true "貓列表的upper"
-// @Param status query int true "貓列表的狀態(待放養 : 0/預約中 : 1/繁殖中 : 2/收養中 : 3)"
-// @Success 200 {object} controller.GetCatResponse
-// @Failure 400 {object} httputil.HTTPError
-// @Failure 500 {object} httputil.HTTPError
-// @Router /api/v1/cat [get]
-func (controller *CatController) GetCat(context *gin.Context) {
-	var total int
-	var cats []orm.Cat
-	var request GetCatRequest
-	var catsResponse []CatItem
-	if err := context.Bind(&request); err != nil {
-		httputil.NewError(context, http.StatusBadRequest, err)
-		return
-	}
-	if err := orm.Engine.Table("cats").Where("Status = ?", request.Status).Count(&total).Limit(request.Upper - request.Lower).Offset(request.Lower).Find(&cats).Error; err != nil {
-		httputil.NewError(context, http.StatusInternalServerError, err)
-		return
-	}
-	for _, cat := range cats {
-		catsResponse = append(catsResponse, CatItem{
-			Name:             cat.Name,
-			Level:            cat.Level,
-			Price:            cat.Price,
-			PetCoin:          cat.PetCoin,
-			ReservationPrice: cat.ReservationPrice,
-			AdoptionPrice:    cat.AdoptionPrice,
-			ContractDays:     cat.ContractDays,
-			ContractBenefit:  cat.ContractBenefit,
-			CatThumbnailPath: fmt.Sprintf("/api/v1/cat/%d/thumbnail", cat.ID),
-		})
-	}
-	context.JSON(http.StatusOK, &GetCatResponse{
-		ListResponse: ListResponse{
-			Lower: request.Lower,
-			Upper: request.Upper,
-			Total: total,
-		},
-		Cats: catsResponse,
-	})
-}
-
 type PutModifyCatRequest struct {
 	Name             string `form:"name" json:"name"`
 	Level            string `form:"level" json:"level"`
@@ -146,6 +78,7 @@ type PutModifyCatRequest struct {
 // @Description modify cat information to the database
 // @Accept multipart/form-data
 // @Produce json
+// @Param catId path int true "貓的ID"
 // @Param name formData string true "貓的名稱"
 // @Param level formData string true "貓的級別"
 // @Param price formData string true "貓的價格"
@@ -158,7 +91,7 @@ type PutModifyCatRequest struct {
 // @Success 200 {object} controller.Message
 // @Failure 400 {object} httputil.HTTPError
 // @Failure 500 {object} httputil.HTTPError
-// @Router /api/v1/cat/{catId} [put]
+// @Router /api/v1/cats/{catId} [put]
 func (controller *CatController) PutModifyCat(context *gin.Context) {
 	catIdString := context.Param("catId")
 	catId, err := strconv.ParseUint(catIdString, 10, 32)
@@ -171,8 +104,8 @@ func (controller *CatController) PutModifyCat(context *gin.Context) {
 		httputil.NewError(context, http.StatusBadRequest, err)
 		return
 	}
-	var cat orm.Cat
-	if err := orm.Engine.First(&cat,catId).Error; err != nil {
+	var cat orm.Cats
+	if err := orm.Engine.First(&cat, catId).Error; err != nil {
 		httputil.NewError(context, http.StatusInternalServerError, err)
 		return
 	}
@@ -190,4 +123,77 @@ func (controller *CatController) PutModifyCat(context *gin.Context) {
 		return
 	}
 	context.JSON(http.StatusOK, Message{Message: fmt.Sprintf("update cat complete catID=%d", cat.ID)})
+}
+
+type GetCatListRequest struct {
+	ListRequest
+	Status int `form:"status" json:"status"`
+}
+
+type GetCatListResponse struct {
+	ListResponse
+	Cats []CatItem `form:"cats" json:"cats"`
+}
+
+type CatItem struct {
+	Id               uint   `form:"id" json:"id"`
+	Name             string `form:"name" json:"name"`
+	Level            string `form:"level" json:"level"`
+	Price            int64  `form:"price" json:"price"`
+	PetCoin          int64  `form:"pet_coin" json:"pet_coin"`
+	ReservationPrice int64  `form:"reservation_price" json:"reservation_price"`
+	AdoptionPrice    int64  `form:"adoption_price" json:"adoption_price"`
+	ContractDays     int64  `form:"contract_days" json:"contract_days"`
+	ContractBenefit  int64  `form:"contract_benefit" json:"contract_benefit"`
+	CatThumbnailPath string `form:"cat_thumbnail_path" json:"cat_thumbnail_path"`
+}
+
+// @Description get cat list with status from database
+// @Accept json
+// @Produce json
+// @Param lower query int true "貓列表的lower"
+// @Param upper query int true "貓列表的upper"
+// @Param status query int true "貓列表的狀態(待放養 : 0/預約中 : 1/繁殖中 : 2/收養中 : 3)"
+// @Success 200 {object} controller.GetCatListResponse
+// @Failure 400 {object} httputil.HTTPError
+// @Failure 500 {object} httputil.HTTPError
+// @Router /api/v1/cats [get]
+func (controller *CatController) GetCatList(context *gin.Context) {
+	var total int
+	var cats []orm.Cats
+	var request GetCatListRequest
+	var catsResponse []CatItem
+	if err := context.Bind(&request); err != nil {
+		httputil.NewError(context, http.StatusBadRequest, err)
+		return
+	}
+	if err := orm.Engine.Table("cats").
+		Where("Status = ?", request.Status).
+		Count(&total).Limit(request.Upper - request.Lower + 1).Offset(request.Lower).
+		Find(&cats).Error; err != nil {
+		httputil.NewError(context, http.StatusInternalServerError, err)
+		return
+	}
+	for _, cat := range cats {
+		catsResponse = append(catsResponse, CatItem{
+			Id:               cat.ID,
+			Name:             cat.Name,
+			Level:            cat.Level,
+			Price:            cat.Price,
+			PetCoin:          cat.PetCoin,
+			ReservationPrice: cat.ReservationPrice,
+			AdoptionPrice:    cat.AdoptionPrice,
+			ContractDays:     cat.ContractDays,
+			ContractBenefit:  cat.ContractBenefit,
+			CatThumbnailPath: fmt.Sprintf("/api/v1/cat/%d/thumbnail", cat.ID),
+		})
+	}
+	context.JSON(http.StatusOK, &GetCatListResponse{
+		ListResponse: ListResponse{
+			Lower: request.Lower,
+			Upper: request.Upper,
+			Total: total,
+		},
+		Cats: catsResponse,
+	})
 }

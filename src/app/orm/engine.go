@@ -23,11 +23,11 @@ func ConnectDBEngine() {
 	}
 	Engine.DB().SetMaxIdleConns(10)
 	Engine.AutoMigrate(
-		new(Sessions), new(ApplicationConfig),
+		new(Sessions), new(ApplicationConfigs),
 		new(Admins),
 		new(Users),
-		new(Cat), new(CatThumbnails),
-		new(AdminTimePeriodTemplate), new(AdoptionTimePeriod), new(AdoptionTimePeriodCatPivot))
+		new(Cats), new(CatThumbnails),
+		new(AdminTimePeriodTemplates), new(AdoptionTimePeriods), new(AdoptionTimePeriodCatPivots))
 	Engine.LogMode(true)
 	CheckDefaultAdmin()
 }
