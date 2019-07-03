@@ -2,8 +2,8 @@ package controller
 
 import (
 	"cat-api/src/app/orm"
+	"cat-api/src/app/session"
 	"fmt"
-	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 	"github.com/swaggo/swag/example/celler/httputil"
@@ -40,8 +40,12 @@ func (controller *AdminController) PostAdminLogin(context *gin.Context) {
 		httputil.NewError(context, http.StatusUnauthorized, errors.New("account or password incorrect"))
 		return
 	}
-	session := sessions.Default(context)
-	session.Set("admin_login", true)
-	session.Save()
+	if err := session.Set(context, session.AdminSessionKey, session.AdminSessionValue{
+		IsLogin: true,
+		Admin:   admin,
+	}); err != nil {
+		httputil.NewError(context, http.StatusInternalServerError, err)
+		return
+	}
 	context.JSON(http.StatusOK, Message{Message: fmt.Sprintf("admin login success")})
 }

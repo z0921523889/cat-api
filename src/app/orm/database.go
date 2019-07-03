@@ -19,16 +19,25 @@ type ApplicationConfigs struct {
 type Admins struct {
 	gorm.Model
 	Account                     string                     `gorm:"type:varchar(25);not null;unique;column:account"`
-	Password                    string                     `gorm:"type:varchar(25);not null;unique;column:password"`
+	Password                    string                     `gorm:"type:varchar(25);not null;column:password"`
 	AdminTimePeriodTemplateList []AdminTimePeriodTemplates `gorm:"foreignkey:AdminId"`
+}
+
+type AdminProfiles struct {
+	gorm.Model
+	AdminId     uint   `gorm:"type:integer;not null;column:admin_id"`
+	permissions []byte `gorm:"type:bytea;not null;column:permissions"`
 }
 
 type Users struct {
 	gorm.Model
-	Name             string `gorm:"type:varchar(25);not null;unique;column:usr_name"`
 	Phone            string `gorm:"type:varchar(15);not null;unique;column:phone"`
-	Password         string `gorm:"type:varchar(25);not null;unique;column:password"`
-	SecurityPassword string `gorm:"type:varchar(25);not null;unique;column:security_password"`
+	UserName             string `gorm:"type:varchar(25);not null;column:usr_name"`
+	Password         string `gorm:"type:varchar(25);not null;column:password"`
+	SecurityPassword string `gorm:"type:varchar(25);not null;column:security_password"`
+	IdentifiedCode   string `gorm:"type:varchar(25);not null;column:identified_code"`
+	//state:       有效的 : 1 / 無效的 : 2/ 被封鎖的 : 3
+	Status int64 `gorm:"type:integer;not null;column:status"`
 }
 
 type Cats struct {
@@ -41,7 +50,7 @@ type Cats struct {
 	AdoptionPrice    int64  `gorm:"type:integer;not null;column:adoption_price"`
 	ContractDays     int64  `gorm:"type:integer;not null;column:contract_days"`
 	ContractBenefit  int64  `gorm:"type:integer;not null;column:contract_benefit"`
-	//state:        待售中 : 0 /預約中 : 1 /確認交易 :2 / 待交貨 : 3 /收養中 : 4
+	//state:       系統代售中 : 1 / 待售中 : 2/預約中 : 3 /確認交易 :4 / 待交貨 : 5 /收養中 : 6
 	Status              int64                 `gorm:"type:integer;not null;column:status"`
 	CatThumbnailId      uint                  `gorm:"type:integer;column:cat_thumbnail_id"`
 	AdoptionTimePeriods []AdoptionTimePeriods `gorm:"many2many:adoption_time_period_cat_pivot"`
@@ -70,4 +79,10 @@ type AdoptionTimePeriodCatPivots struct {
 	gorm.Model
 	CatsId                uint `gorm:"type:integer;column:cats_id"`
 	AdoptionTimePeriodsId uint `gorm:"type:integer;column:adoption_time_periods_id"`
+}
+
+type CatUserReservations struct {
+	gorm.Model
+	CatsId  uint `gorm:"type:integer;column:cats_id"`
+	UsersId uint `gorm:"type:integer;column:users_id"`
 }

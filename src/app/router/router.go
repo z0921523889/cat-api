@@ -32,6 +32,7 @@ func InitialRouterEngine() *gin.Engine {
 	//Group v1
 	v1 := router.Group("api/v1")
 	// Group v1 non auth
+	v1.POST("/user/register", userController.PostUserRegister)
 	v1.POST("/user/login", userController.PostUserLogin)
 	v1.POST("/admin/login", adminController.PostAdminLogin)
 	// Group admin auth
@@ -47,8 +48,6 @@ func InitialRouterEngine() *gin.Engine {
 	// Group user auth
 	userAuth := v1.Use(middleware.GetHandlerFunc(userAuthMiddleware))
 	userAuth.GET("/user/info", userController.GetUserInfo)
-	userAuth.GET("/user/avatar", userController.GetUserAvatar)
-	userAuth.POST("/user/avatar", userController.PostUserAvatar)
 	//cat
 	userAuth.GET("/cats", catController.GetCatList)
 	userAuth.GET("/cat/thumbnails", catThumbnailController.GetCatThumbnailList)

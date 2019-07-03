@@ -24,7 +24,7 @@ func ConnectDBEngine() {
 	Engine.DB().SetMaxIdleConns(10)
 	Engine.AutoMigrate(
 		new(Sessions), new(ApplicationConfigs),
-		new(Admins),
+		new(Admins),new(AdminProfiles),
 		new(Users),
 		new(Cats), new(CatThumbnails),
 		new(AdminTimePeriodTemplates), new(AdoptionTimePeriods), new(AdoptionTimePeriodCatPivots))

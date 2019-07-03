@@ -5,7 +5,7 @@
 
 #### Build Docker Image:
     cd ./
-    docker build -t cat-api
+    docker build -t cat-api .
     
 #### Copy .env.example as .env file ####
     cp .env.example .env    
@@ -17,6 +17,6 @@
 
 #### Use Docker Compose
     cp .docker-compose.yml.example .docker-compose.yml
-    change POSTGRES_HOST=db
+    change env file POSTGRES_HOST=db
     docker network create app_net
     docker-compose up -d

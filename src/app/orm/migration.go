@@ -21,7 +21,7 @@ func CheckDefaultAdmin() {
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			admin.ID = 1
-			admin.Name = "system"
+			admin.Account = "system"
 			admin.Password = "system"
 			session := Engine.Begin()
 			if err := session.Create(&admin).Error; err != nil {

@@ -52,7 +52,7 @@ func (controller *CatController) PostCat(context *gin.Context) {
 		PetCoin:          request.PetCoin,
 		ReservationPrice: request.ReservationPrice,
 		AdoptionPrice:    request.AdoptionPrice,
-		Status:           0,
+		Status:           1,
 		ContractDays:     request.ContractDays,
 		ContractBenefit:  request.ContractBenefit,
 	}
@@ -146,6 +146,7 @@ type CatItem struct {
 	ContractDays     int64  `form:"contract_days" json:"contract_days"`
 	ContractBenefit  int64  `form:"contract_benefit" json:"contract_benefit"`
 	CatThumbnailPath string `form:"cat_thumbnail_path" json:"cat_thumbnail_path"`
+	Status           int64  `form:"status" json:"status"`
 }
 
 // @Description get cat list with status from database
@@ -167,9 +168,12 @@ func (controller *CatController) GetCatList(context *gin.Context) {
 		httputil.NewError(context, http.StatusBadRequest, err)
 		return
 	}
-	if err := orm.Engine.Table("cats").
-		Where("Status = ?", request.Status).
-		Count(&total).Limit(request.Upper - request.Lower + 1).Offset(request.Lower).
+	command := orm.Engine.Table("cats")
+	if request.Status > 0 {
+		command = command.Where("Status = ?", request.Status)
+	}
+	if err := command.Count(&total).
+		Limit(request.Upper - request.Lower + 1).Offset(request.Lower).
 		Find(&cats).Error; err != nil {
 		httputil.NewError(context, http.StatusInternalServerError, err)
 		return
@@ -186,6 +190,7 @@ func (controller *CatController) GetCatList(context *gin.Context) {
 			ContractDays:     cat.ContractDays,
 			ContractBenefit:  cat.ContractBenefit,
 			CatThumbnailPath: fmt.Sprintf("/api/v1/cat/%d/thumbnail", cat.ID),
+			Status:           cat.Status,
 		})
 	}
 	context.JSON(http.StatusOK, &GetCatListResponse{
