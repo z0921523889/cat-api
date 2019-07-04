@@ -7,6 +7,11 @@ services:
       dockerfile: Dockerfile
     image: ${TYPE}_${PROJECT_NAME}_web_api
     container_name: ${TYPE}_${PROJECT_NAME}_web_api
+    labels:
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host:${DOMAIN_NAME}"
+      traefik.backend: "${TYPE}-${PROJECT_NAME}-web-api"
+      traefik.port: "${APPLICATION_PORT}"
     depends_on:
       - sys_postgres
     ports:

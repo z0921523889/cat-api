@@ -1,5 +1,4 @@
-debug = false
-
+debug = true
 logLevel = "INFO"
 defaultEntryPoints = ["http"]
 
