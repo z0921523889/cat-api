@@ -15,7 +15,7 @@
 #### use Docker run
     docker run -i --env-file=.env.example -p 8085:8085 -t cat-api:0.0.0
 
-#### Use Docker Compose with traefik
+#### Use Docker Compose with existing traefik proxy
     docker network create traefik
     docker-compose -f docker-compose.yml up -d
     
