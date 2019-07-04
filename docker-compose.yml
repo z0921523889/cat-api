@@ -14,8 +14,6 @@ services:
       traefik.port: "${APPLICATION_PORT}"
     depends_on:
       - sys_postgres
-    ports:
-      - ${APPLICATION_PORT}:${APPLICATION_PORT}
     environment:
       TYPE: ${TYPE}
       PROJECT_NAME: ${PROJECT_NAME}

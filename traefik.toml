@@ -1,12 +1,9 @@
 debug = true
+
 logLevel = "INFO"
 defaultEntryPoints = ["http"]
 
-[entryPoints]
-  [entryPoints.http]
-  address = ":80"
 
-[retry]
 
 ################################################################
 # Docker Provider
@@ -26,3 +23,25 @@ endpoint = "unix:///var/run/docker.sock"
 # Optional
 #
 watch = true
+
+
+################################################################
+# 入口點設定
+################################################################
+
+[entryPoints]
+  [entryPoints.http]
+  address = ":80"
+
+[retry]
+
+# 控制檯埠
+[entryPoints.traefik-api]
+address = ":4399"
+# 如果不想公開控制檯，可以參考下面的配置生成你自己的 BA 賬號密碼
+#[entryPoints.traefik-api.auth]
+#[entryPoints.traefik-api.auth.basic]
+#htpasswd -nb soulteary soulteary
+users = ["soulteary:$apr1$hVv8KPU8$IiTLEE5QYKgd4mZuCXpOD."]
+[entryPoints.traefik-api.redirect]
+entryPoint = "https"
