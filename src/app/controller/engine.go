@@ -2,6 +2,7 @@ package controller
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"io"
 	"io/ioutil"
@@ -46,4 +47,11 @@ type ListResponse struct {
 
 type Message struct {
 	Message string `json:"message" example:"message"`
+}
+
+type EngineController struct {
+}
+
+func (controller *EngineController) GetTest(context *gin.Context) {
+	context.JSON(http.StatusOK, Message{Message: fmt.Sprintf("test on api engine...")})
 }

@@ -26,10 +26,10 @@ func StartServer() {
 	defer orm.CloseDBEngine()
 	conf.CheckDataBaseConfig()
 	routerEngine := router.InitialRouterEngine()
-	if env.SwaggerDocEnable {
+	if env.Type == "dev" {
 		routerEngine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	}
-	if env.ScheduleJobEnable{
+	if env.ScheduleJobEnable {
 		schedule.StartScheduleJobs()
 	}
 	err := routerEngine.Run(":" + env.ApplicationPort)

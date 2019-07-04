@@ -1,16 +1,31 @@
 version: '3.7'
 services:
 
+  traefik:
+    image: traefik
+    container_name: traefik
+    ports:
+      - 80:80
+    networks:
+      - traefik
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./traefik.toml:/traefik.toml
+    restart: always
+
   web_api:
     build:
       context: .
       dockerfile: Dockerfile
     image: ${TYPE}_${PROJECT_NAME}_web_api
     container_name: ${TYPE}_${PROJECT_NAME}_web_api
+    labels:
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host:${DOMAIN_NAME}"
+      traefik.backend: "${TYPE}-${PROJECT_NAME}-web-api"
+      traefik.port: "${APPLICATION_PORT}"
     depends_on:
       - sys_postgres
-    ports:
-      - ${APPLICATION_PORT}:${APPLICATION_PORT}
     environment:
       TYPE: ${TYPE}
       PROJECT_NAME: ${PROJECT_NAME}

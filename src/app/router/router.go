@@ -32,6 +32,7 @@ func InitialRouterEngine() *gin.Engine {
 	//Group v1
 	v1 := router.Group("api/v1")
 	// Group v1 non auth
+	v1.GET("/test", (&controller.EngineController{}).GetTest)
 	v1.POST("/user/register", userController.PostUserRegister)
 	v1.POST("/user/login", userController.PostUserLogin)
 	v1.POST("/admin/login", adminController.PostAdminLogin)
