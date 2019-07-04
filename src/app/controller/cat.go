@@ -87,7 +87,7 @@ type PutModifyCatRequest struct {
 // @Param adoption_price formData string true "貓的即搶價格"
 // @Param contract_days formData string true "貓的合約時間"
 // @Param contract_benefit formData string true "貓的合約增益"
-// @Param status formData string true "貓的狀態(待放養 : 0/預約中 : 1/繁殖中 : 2/收養中 : 3)"
+// @Param status formData string true "貓的狀態(系統代售中 : 1 / 待售中 : 2/預約中 : 3 /確認交易 :4 / 待交貨 : 5 /收養中 : 6)"
 // @Success 200 {object} controller.Message
 // @Failure 400 {object} httputil.HTTPError
 // @Failure 500 {object} httputil.HTTPError
@@ -189,7 +189,7 @@ func (controller *CatController) GetCatList(context *gin.Context) {
 			AdoptionPrice:    cat.AdoptionPrice,
 			ContractDays:     cat.ContractDays,
 			ContractBenefit:  cat.ContractBenefit,
-			CatThumbnailPath: fmt.Sprintf("/api/v1/cat/%d/thumbnail", cat.ID),
+			CatThumbnailPath: fmt.Sprintf("/api/v1/thumbnail/cats/%d", cat.ID),
 			Status:           cat.Status,
 		})
 	}

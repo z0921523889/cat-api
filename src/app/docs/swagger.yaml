@@ -93,6 +93,19 @@ definitions:
       user_name:
         type: string
     type: object
+  controller.GetUserListResponse:
+    properties:
+      lower:
+        type: integer
+      total:
+        type: integer
+      upper:
+        type: integer
+      users:
+        items:
+          $ref: '#/definitions/controller.UserItem'
+        type: array
+    type: object
   controller.Message:
     properties:
       message:
@@ -110,6 +123,17 @@ definitions:
       id:
         type: integer
       start_at:
+        type: string
+    type: object
+  controller.UserItem:
+    properties:
+      id:
+        type: integer
+      identified_code:
+        type: string
+      phone:
+        type: string
+      user_name:
         type: string
     type: object
   httputil.HTTPError:
@@ -380,7 +404,7 @@ paths:
         name: contract_benefit
         required: true
         type: string
-      - description: '貓的狀態(待放養 : 0/預約中 : 1/繁殖中 : 2/收養中 : 3)'
+      - description: '貓的狀態(系統代售中 : 1 / 待售中 : 2/預約中 : 3 /確認交易 :4 / 待交貨 : 5 /收養中 : 6)'
         in: formData
         name: status
         required: true
@@ -392,6 +416,45 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/controller.Message'
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+            type: object
+  /api/v1/cats/time/schedules/{scheduleId}:
+    get:
+      consumes:
+      - application/json
+      description: get cat list with timeSchedule from database
+      parameters:
+      - description: 時段的ID
+        in: path
+        name: scheduleId
+        required: true
+        type: integer
+      - description: 貓列表的lower
+        in: query
+        name: lower
+        required: true
+        type: integer
+      - description: 貓列表的upper
+        in: query
+        name: upper
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.GetTimeScheduleCatResponse'
             type: object
         "400":
           description: Bad Request
@@ -538,45 +601,6 @@ paths:
           schema:
             $ref: '#/definitions/httputil.HTTPError'
             type: object
-  /api/v1/time/schedules/{scheduleId}:
-    get:
-      consumes:
-      - application/json
-      description: get cat list with timeSchedule from database
-      parameters:
-      - description: 時段的ID
-        in: path
-        name: scheduleId
-        required: true
-        type: integer
-      - description: 貓列表的lower
-        in: query
-        name: lower
-        required: true
-        type: integer
-      - description: 貓列表的upper
-        in: query
-        name: upper
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/controller.GetTimeScheduleCatResponse'
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/httputil.HTTPError'
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/httputil.HTTPError'
-            type: object
   /api/v1/time/schedules/{scheduleId}/cat/{catId}:
     post:
       consumes:
@@ -710,6 +734,40 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/controller.Message'
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+            type: object
+  /api/v1/users:
+    get:
+      consumes:
+      - application/json
+      description: get user list
+      parameters:
+      - description: 用戶列表的lower
+        in: query
+        name: lower
+        required: true
+        type: integer
+      - description: 用戶列表的upper
+        in: query
+        name: upper
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.GetUserListResponse'
             type: object
         "400":
           description: Bad Request

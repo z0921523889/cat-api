@@ -78,7 +78,7 @@ func (controller *CatThumbnailController) GetCatThumbnailList(context *gin.Conte
 	for _, catThumbnail := range catThumbnails {
 		catThumbnailResponse = append(catThumbnailResponse, CatThumbnailItem{
 			Id:               catThumbnail.ID,
-			CatThumbnailPath: fmt.Sprintf("/api/v1/cat/%d/thumbnail", catThumbnail.ID),
+			CatThumbnailPath: fmt.Sprintf("/api/v1/thumbnail/cats/%d", catThumbnail.ID),
 		})
 	}
 	context.JSON(http.StatusOK, &GetCatThumbnailListResponse{
@@ -127,7 +127,7 @@ func (controller *CatThumbnailController) GetCatThumbnail(context *gin.Context) 
 // @Failure 400 {object} httputil.HTTPError
 // @Failure 500 {object} httputil.HTTPError
 // @Router /api/v1/thumbnails/{thumbnailId}/cats/{catId} [put]
-func (controller *CatThumbnailController) PutModifyCatThumbnail(context *gin.Context) {
+func (controller *CatThumbnailController) PostCatThumbnailBind(context *gin.Context) {
 	catIdString := context.Param("catId")
 	catId, err := strconv.ParseUint(catIdString, 10, 32)
 	if err != nil {

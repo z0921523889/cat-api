@@ -69,7 +69,7 @@ type GetTimeScheduleCatResponse struct {
 // @Success 200 {object} controller.GetTimeScheduleCatResponse
 // @Failure 400 {object} httputil.HTTPError
 // @Failure 500 {object} httputil.HTTPError
-// @Router /api/v1/time/schedules/{scheduleId} [get]
+// @Router /api/v1/cats/time/schedules/{scheduleId} [get]
 func (controller *TimeScheduleController) GetTimeScheduleCat(context *gin.Context) {
 	var total int
 	var cats []orm.Cats
@@ -109,7 +109,7 @@ func (controller *TimeScheduleController) GetTimeScheduleCat(context *gin.Contex
 			AdoptionPrice:    cat.AdoptionPrice,
 			ContractDays:     cat.ContractDays,
 			ContractBenefit:  cat.ContractBenefit,
-			CatThumbnailPath: fmt.Sprintf("/api/v1/cat/%d/thumbnail", cat.ID),
+			CatThumbnailPath: fmt.Sprintf("/api/v1/thumbnail/cats/%d", cat.ID),
 		})
 	}
 	context.JSON(http.StatusOK, &GetTimeScheduleCatResponse{

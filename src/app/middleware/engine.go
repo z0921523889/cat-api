@@ -9,7 +9,5 @@ type Middleware interface {
 }
 
 func GetHandlerFunc(middleware Middleware) gin.HandlerFunc {
-	return func(context *gin.Context) {
-		middleware.Execute(context)
-	}
+	return middleware.Execute
 }

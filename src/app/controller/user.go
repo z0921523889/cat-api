@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/swaggo/swag/example/celler/httputil"
-	"log"
 	"net/http"
 	"time"
 )
@@ -91,7 +90,6 @@ func (controller *UserController) PostUserRegister(context *gin.Context) {
 	hash := sha1.New()
 	hash.Write([]byte(request.Phone + time.Now().String()))
 	code := base64.URLEncoding.EncodeToString(hash.Sum(nil))
-	log.Println(code)
 	user := orm.Users{
 		Phone:            request.Phone,
 		UserName:         request.UserName,
@@ -122,14 +120,68 @@ type GetUserInfoResponse struct {
 // @Router /api/v1/user/info [get]
 func (controller *UserController) GetUserInfo(context *gin.Context) {
 	sessionData := session.Get(context, session.UserSessionKey)
-	if sessionData == nil {
-		httputil.NewError(context, http.StatusUnauthorized, errors.New("user does not authorized"))
-		return
-	}
 	sessionValue := sessionData.(session.UserSessionValue)
 	context.JSON(http.StatusOK, GetUserInfoResponse{
 		UserName:       sessionValue.User.UserName,
 		Phone:          sessionValue.User.Phone,
 		IdentifiedCode: sessionValue.User.IdentifiedCode,
+	})
+}
+
+type GetUserListRequest struct {
+	ListRequest
+}
+
+type GetUserListResponse struct {
+	ListResponse
+	Users []UserItem `form:"users" json:"users"`
+}
+
+type UserItem struct {
+	Id             uint   `form:"id" json:"id"`
+	UserName       string `form:"user_name" json:"user_name"`
+	Phone          string `form:"phone" json:"phone"`
+	IdentifiedCode string `form:"identified_code" json:"identified_code"`
+}
+
+// @Description get user list
+// @Accept json
+// @Produce json
+// @Param lower query int true "用戶列表的lower"
+// @Param upper query int true "用戶列表的upper"
+// @Success 200 {object} controller.GetUserListResponse
+// @Failure 400 {object} httputil.HTTPError
+// @Failure 500 {object} httputil.HTTPError
+// @Router /api/v1/users [get]
+func (controller *UserController) GetUserList(context *gin.Context) {
+	var total int
+	var users []orm.Users
+	var request GetUserListRequest
+	var usersResponse []UserItem
+	if err := context.Bind(&request); err != nil {
+		httputil.NewError(context, http.StatusBadRequest, err)
+		return
+	}
+	if err := orm.Engine.Table("users").Count(&total).
+		Limit(request.Upper - request.Lower + 1).Offset(request.Lower).
+		Find(&users).Error; err != nil {
+		httputil.NewError(context, http.StatusInternalServerError, err)
+		return
+	}
+	for _, user := range users {
+		usersResponse = append(usersResponse, UserItem{
+			Id:             user.ID,
+			UserName:       user.UserName,
+			Phone:          user.Phone,
+			IdentifiedCode: user.IdentifiedCode,
+		})
+	}
+	context.JSON(http.StatusOK, &GetUserListResponse{
+		ListResponse: ListResponse{
+			Lower: request.Lower,
+			Upper: request.Upper,
+			Total: total,
+		},
+		Users: usersResponse,
 	})
 }

@@ -113,13 +113,24 @@ func (store *SessionPostgresStore) save(session *sessions.Session) error {
 	if age == 0 {
 		age = store.DefaultMaxAge
 	}
-	sessionData := orm.Sessions{
-		Token:  store.keyPrefix + session.ID,
-		Data:   b,
-		Expiry: time.Now().Add(time.Second * time.Duration(age)),
-	}
-	if err := orm.Engine.Create(&sessionData).Error; err != nil {
-		return err
+	token := store.keyPrefix + session.ID
+	expiry := time.Now().Add(time.Second * time.Duration(age))
+	var sessionData orm.Sessions
+	if orm.Engine.First(&sessionData, "token = ?", token).RecordNotFound() {
+		sessionData = orm.Sessions{
+			Token:  store.keyPrefix + session.ID,
+			Data:   b,
+			Expiry: expiry,
+		}
+		if err := orm.Engine.Create(&sessionData).Error; err != nil {
+			return err
+		}
+	} else {
+		sessionData.Data = b
+		sessionData.Expiry = expiry
+		if err := orm.Engine.Save(&sessionData).Error; err != nil {
+			return err
+		}
 	}
 	return nil
 }

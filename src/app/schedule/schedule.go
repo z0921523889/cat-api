@@ -11,11 +11,11 @@ import (
 
 func StartScheduleJobs() {
 	c := cron.New()
-	c.AddFunc("@monthly", generateTimePeriod)
+	c.AddFunc("@monthly", GenerateTimePeriod)
 	c.Start()
 }
 
-func generateTimePeriod() {
+func GenerateTimePeriod() {
 	log.Println("run generateTimePeriod")
 	admin := orm.Admins{}
 	var templateList []orm.AdminTimePeriodTemplates

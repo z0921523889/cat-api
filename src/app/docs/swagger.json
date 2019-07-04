@@ -302,6 +302,63 @@
                 }
             }
         },
+        "/api/v1/cats/time/schedules/{scheduleId}": {
+            "get": {
+                "description": "get cat list with timeSchedule from database",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "時段的ID",
+                        "name": "scheduleId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "貓列表的lower",
+                        "name": "lower",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "貓列表的upper",
+                        "name": "upper",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/controller.GetTimeScheduleCatResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/httputil.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/httputil.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/cats/{catId}": {
             "put": {
                 "description": "modify cat information to the database",
@@ -377,7 +434,7 @@
                     },
                     {
                         "type": "string",
-                        "description": "貓的狀態(待放養 : 0/預約中 : 1/繁殖中 : 2/收養中 : 3)",
+                        "description": "貓的狀態(系統代售中 : 1 / 待售中 : 2/預約中 : 3 /確認交易 :4 / 待交貨 : 5 /收養中 : 6)",
                         "name": "status",
                         "in": "formData",
                         "required": true
@@ -607,63 +664,6 @@
                 }
             }
         },
-        "/api/v1/time/schedules/{scheduleId}": {
-            "get": {
-                "description": "get cat list with timeSchedule from database",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "時段的ID",
-                        "name": "scheduleId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "貓列表的lower",
-                        "name": "lower",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "貓列表的upper",
-                        "name": "upper",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "$ref": "#/definitions/controller.GetTimeScheduleCatResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "$ref": "#/definitions/httputil.HTTPError"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "$ref": "#/definitions/httputil.HTTPError"
-                        }
-                    }
-                }
-            }
-        },
         "/api/v1/time/schedules/{scheduleId}/cat/{catId}": {
             "post": {
                 "description": "Add a new timePeriodCatPivot",
@@ -874,6 +874,56 @@
                     }
                 }
             }
+        },
+        "/api/v1/users": {
+            "get": {
+                "description": "get user list",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "用戶列表的lower",
+                        "name": "lower",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "用戶列表的upper",
+                        "name": "upper",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/controller.GetUserListResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/httputil.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/httputil.HTTPError"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -1020,6 +1070,26 @@
                 }
             }
         },
+        "controller.GetUserListResponse": {
+            "type": "object",
+            "properties": {
+                "lower": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
+                },
+                "upper": {
+                    "type": "integer"
+                },
+                "users": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/controller.UserItem"
+                    }
+                }
+            }
+        },
         "controller.Message": {
             "type": "object",
             "properties": {
@@ -1045,6 +1115,23 @@
                     "type": "integer"
                 },
                 "start_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "controller.UserItem": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "identified_code": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "user_name": {
                     "type": "string"
                 }
             }

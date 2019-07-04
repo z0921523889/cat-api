@@ -22,6 +22,7 @@ type AdminSessionValue struct {
 
 func init()  {
 	gob.Register(UserSessionValue{})
+	gob.Register(AdminSessionValue{})
 }
 
 func Get(context *gin.Context, key string) interface{} {

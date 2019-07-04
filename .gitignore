@@ -13,6 +13,3 @@
 
 # env file
 .env
-
-# docker compose
-docker-compose.yml

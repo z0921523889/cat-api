@@ -6,6 +6,8 @@ services:
       networks:
         - default
         - app_net
+      volumes:
+        - cat_postgres:/var/lib/postgresql/data
       environment:
         POSTGRES_USER : ${POSTGRES_USER}
         POSTGRES_PASSWORD : ${POSTGRES_PASSWORD}
@@ -32,4 +34,7 @@ services:
         SWAGGER_DOC_ENABLE  : ${SWAGGER_DOC_ENABLE}
 networks:
   app_net:
+    external: true
+volumes:
+  cat_postgres:
     external: true
