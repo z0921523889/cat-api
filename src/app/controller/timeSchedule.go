@@ -93,7 +93,7 @@ func (controller *TimeScheduleController) GetTimeScheduleList(context *gin.Conte
 	var total int
 	var timePeriods []orm.AdoptionTimePeriods
 	var request GetTimePeriodRequest
-	var timePeriodResponse []TimePeriodItem
+	var response GetTimePeriodResponse
 	if err := context.Bind(&request); err != nil {
 		httputil.NewError(context, http.StatusBadRequest, err)
 		return
@@ -121,6 +121,7 @@ func (controller *TimeScheduleController) GetTimeScheduleList(context *gin.Conte
 				Name:             cat.Name,
 				Level:            cat.Level,
 				Price:            cat.Price,
+				Deposit:          cat.Deposit,
 				PetCoin:          cat.PetCoin,
 				ReservationPrice: cat.ReservationPrice,
 				AdoptionPrice:    cat.AdoptionPrice,
@@ -129,19 +130,15 @@ func (controller *TimeScheduleController) GetTimeScheduleList(context *gin.Conte
 				CatThumbnailPath: fmt.Sprintf("/api/v1/cat/%d/thumbnail", cat.ID),
 			})
 		}
-		timePeriodResponse = append(timePeriodResponse, TimePeriodItem{
+		response.TimePeriods = append(response.TimePeriods, TimePeriodItem{
 			Id:      timePeriod.ID,
 			StartAt: timePeriod.EndAt,
 			EndAt:   timePeriod.EndAt,
 			Cats:    catList,
 		})
 	}
-	context.JSON(http.StatusOK, &GetTimePeriodResponse{
-		ListResponse: ListResponse{
-			Lower: request.Lower,
-			Upper: request.Upper,
-			Total: total,
-		},
-		TimePeriods: timePeriodResponse,
-	})
+	response.Lower = request.Lower
+	response.Upper = request.Upper
+	response.Total = total
+	context.JSON(http.StatusOK, &response)
 }

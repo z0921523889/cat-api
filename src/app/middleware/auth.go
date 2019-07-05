@@ -11,14 +11,7 @@ import (
 type UserAuthMiddleware struct{}
 
 func (middleware *UserAuthMiddleware) Execute(context *gin.Context) {
-	adminSessionData := session.Get(context, session.AdminSessionKey)
 	userSessionData := session.Get(context, session.UserSessionKey)
-	if adminSessionData != nil {
-		adminSessionValue := adminSessionData.(session.AdminSessionValue)
-		if adminSessionValue.IsLogin {
-			return
-		}
-	}
 	if userSessionData != nil {
 		userSessionValue := userSessionData.(session.UserSessionValue)
 		if userSessionValue.IsLogin {

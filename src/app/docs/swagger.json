@@ -93,6 +93,13 @@
                     },
                     {
                         "type": "string",
+                        "description": "貓的押金",
+                        "name": "deposit",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "貓的pet幣",
                         "name": "pet_coin",
                         "in": "formData",
@@ -123,6 +130,56 @@
                         "type": "string",
                         "description": "貓的合約增益",
                         "name": "contract_benefit",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/controller.Message"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/httputil.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/httputil.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/cat/reservation": {
+            "post": {
+                "description": "Add a new cat_user_reservation",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "貓的ID識別",
+                        "name": "cat_id",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "時段的ID識別",
+                        "name": "time_schedule_id",
                         "in": "formData",
                         "required": true
                     }
@@ -399,6 +456,13 @@
                     },
                     {
                         "type": "string",
+                        "description": "貓的押金",
+                        "name": "deposit",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "貓的pet幣",
                         "name": "pet_coin",
                         "in": "formData",
@@ -508,7 +572,7 @@
             }
         },
         "/api/v1/thumbnails/{thumbnailId}/cats/{catId}": {
-            "put": {
+            "post": {
                 "description": "link cat thumbnail with cat to the database",
                 "consumes": [
                     "application/json"
@@ -798,6 +862,40 @@
                 }
             }
         },
+        "/api/v1/user/logout": {
+            "post": {
+                "description": "user account logout",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/controller.Message"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/httputil.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/httputil.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/user/register": {
             "post": {
                 "description": "user account register",
@@ -940,6 +1038,9 @@
                     "type": "integer"
                 },
                 "contract_days": {
+                    "type": "integer"
+                },
+                "deposit": {
                     "type": "integer"
                 },
                 "id": {

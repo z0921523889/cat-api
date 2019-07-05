@@ -2,6 +2,7 @@ package controller
 
 import (
 	"cat-api/src/app/orm"
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/swaggo/swag/example/celler/httputil"
@@ -64,7 +65,7 @@ func (controller *CatThumbnailController) GetCatThumbnailList(context *gin.Conte
 	var total int
 	var catThumbnails []orm.CatThumbnails
 	var request GetCatThumbnailListRequest
-	var catThumbnailResponse []CatThumbnailItem
+	var response GetCatThumbnailListResponse
 	if err := context.Bind(&request); err != nil {
 		httputil.NewError(context, http.StatusBadRequest, err)
 		return
@@ -76,20 +77,15 @@ func (controller *CatThumbnailController) GetCatThumbnailList(context *gin.Conte
 		return
 	}
 	for _, catThumbnail := range catThumbnails {
-		catThumbnailResponse = append(catThumbnailResponse, CatThumbnailItem{
+		response.CatThumbnails = append(response.CatThumbnails, CatThumbnailItem{
 			Id:               catThumbnail.ID,
 			CatThumbnailPath: fmt.Sprintf("/api/v1/thumbnail/cats/%d", catThumbnail.ID),
 		})
 	}
-	context.JSON(http.StatusOK, &GetCatThumbnailListResponse{
-		ListResponse: ListResponse{
-			Lower: request.Lower,
-			Upper: request.Upper,
-			Total: total,
-		},
-		CatThumbnails: catThumbnailResponse,
-	})
-
+	response.Lower = request.Lower
+	response.Upper = request.Upper
+	response.Total = total
+	context.JSON(http.StatusOK, &response)
 }
 
 
@@ -126,7 +122,7 @@ func (controller *CatThumbnailController) GetCatThumbnail(context *gin.Context) 
 // @Success 200 {object} controller.Message
 // @Failure 400 {object} httputil.HTTPError
 // @Failure 500 {object} httputil.HTTPError
-// @Router /api/v1/thumbnails/{thumbnailId}/cats/{catId} [put]
+// @Router /api/v1/thumbnails/{thumbnailId}/cats/{catId} [post]
 func (controller *CatThumbnailController) PostCatThumbnailBind(context *gin.Context) {
 	catIdString := context.Param("catId")
 	catId, err := strconv.ParseUint(catIdString, 10, 32)
@@ -143,7 +139,7 @@ func (controller *CatThumbnailController) PostCatThumbnailBind(context *gin.Cont
 	var cat orm.Cats
 	var catThumbnail orm.CatThumbnails
 	if orm.Engine.First(&cat, catId).RecordNotFound() || orm.Engine.First(&catThumbnail, thumbnailId).RecordNotFound() {
-		httputil.NewError(context, http.StatusInternalServerError, err)
+		httputil.NewError(context, http.StatusInternalServerError, errors.New("record not found"))
 		return
 	}
 	cat.CatThumbnailId = catThumbnail.ID

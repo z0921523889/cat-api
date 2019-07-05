@@ -76,7 +76,7 @@ func (controller *TimeScheduleController) GetTimeScheduleCat(context *gin.Contex
 	var catIds []uint
 	var timePeriod orm.AdoptionTimePeriods
 	var request GetTimeScheduleCatRequest
-	var catsResponse []CatItem
+	var response GetTimeScheduleCatResponse
 	scheduleIdString := context.Param("scheduleId")
 	scheduleId, err := strconv.ParseUint(scheduleIdString, 10, 32)
 	if err != nil {
@@ -99,7 +99,7 @@ func (controller *TimeScheduleController) GetTimeScheduleCat(context *gin.Contex
 		return
 	}
 	for _, cat := range cats {
-		catsResponse = append(catsResponse, CatItem{
+		response.Cats = append(response.Cats, CatItem{
 			Id:               cat.ID,
 			Name:             cat.Name,
 			Level:            cat.Level,
@@ -112,12 +112,8 @@ func (controller *TimeScheduleController) GetTimeScheduleCat(context *gin.Contex
 			CatThumbnailPath: fmt.Sprintf("/api/v1/thumbnail/cats/%d", cat.ID),
 		})
 	}
-	context.JSON(http.StatusOK, &GetTimeScheduleCatResponse{
-		ListResponse: ListResponse{
-			Lower: request.Lower,
-			Upper: request.Upper,
-			Total: total,
-		},
-		Cats: catsResponse,
-	})
+	response.Lower = request.Lower
+	response.Upper = request.Upper
+	response.Total = total
+	context.JSON(http.StatusOK, &response)
 }

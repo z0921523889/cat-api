@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 	"github.com/swaggo/swag/example/celler/httputil"
+	"log"
 	"net/http"
 )
 
@@ -34,15 +35,25 @@ func (controller *AdminController) PostAdminLogin(context *gin.Context) {
 		httputil.NewError(context, http.StatusBadRequest, err)
 		return
 	}
-	if orm.Engine.Where("account = ?", request.Account).
+	if orm.Engine.
+		Where("account = ?", request.Account).
 		Where("password = ?", request.Password).
+		Preloads("Users").
 		First(&admin).RecordNotFound() {
 		httputil.NewError(context, http.StatusUnauthorized, errors.New("account or password incorrect"))
 		return
 	}
+	log.Println("========================>",admin.Users)
 	if err := session.Set(context, session.AdminSessionKey, session.AdminSessionValue{
 		IsLogin: true,
 		Admin:   admin,
+	}); err != nil {
+		httputil.NewError(context, http.StatusInternalServerError, err)
+		return
+	}
+	if err := session.Set(context, session.UserSessionKey, session.UserSessionValue{
+		IsLogin: true,
+		User:    admin.Users,
 	}); err != nil {
 		httputil.NewError(context, http.StatusInternalServerError, err)
 		return

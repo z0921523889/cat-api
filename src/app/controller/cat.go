@@ -10,13 +10,13 @@ import (
 )
 
 type CatController struct {
-	FileController
 }
 
 type PostCatRequest struct {
 	Name             string `form:"name" json:"name"`
 	Level            string `form:"level" json:"level"`
 	Price            int64  `form:"price" json:"price"`
+	Deposit          int64  `form:"deposit" json:"deposit"`
 	PetCoin          int64  `form:"pet_coin" json:"pet_coin"`
 	ReservationPrice int64  `form:"reservation_price" json:"reservation_price"`
 	AdoptionPrice    int64  `form:"adoption_price" json:"adoption_price"`
@@ -30,6 +30,7 @@ type PostCatRequest struct {
 // @Param name formData string true "貓的名稱"
 // @Param level formData string true "貓的級別"
 // @Param price formData string true "貓的價格"
+// @Param deposit formData string true "貓的押金"
 // @Param pet_coin formData string true "貓的pet幣"
 // @Param reservation_price formData string true "貓的預約價格"
 // @Param adoption_price formData string true "貓的即搶價格"
@@ -49,6 +50,7 @@ func (controller *CatController) PostCat(context *gin.Context) {
 		Name:             request.Name,
 		Level:            request.Level,
 		Price:            request.Price,
+		Deposit:          request.Deposit,
 		PetCoin:          request.PetCoin,
 		ReservationPrice: request.ReservationPrice,
 		AdoptionPrice:    request.AdoptionPrice,
@@ -67,6 +69,7 @@ type PutModifyCatRequest struct {
 	Name             string `form:"name" json:"name"`
 	Level            string `form:"level" json:"level"`
 	Price            int64  `form:"price_min" json:"price"`
+	Deposit          int64  `form:"deposit" json:"deposit"`
 	PetCoin          int64  `form:"pet_coin" json:"pet_coin"`
 	ReservationPrice int64  `form:"reservation_price" json:"reservation_price"`
 	AdoptionPrice    int64  `form:"adoption_price" json:"adoption_price"`
@@ -82,6 +85,7 @@ type PutModifyCatRequest struct {
 // @Param name formData string true "貓的名稱"
 // @Param level formData string true "貓的級別"
 // @Param price formData string true "貓的價格"
+// @Param deposit formData string true "貓的押金"
 // @Param pet_coin formData string true "貓的pet幣"
 // @Param reservation_price formData string true "貓的預約價格"
 // @Param adoption_price formData string true "貓的即搶價格"
@@ -112,6 +116,7 @@ func (controller *CatController) PutModifyCat(context *gin.Context) {
 	cat.Name = request.Name
 	cat.Level = request.Level
 	cat.Price = request.Price
+	cat.Deposit = request.Deposit
 	cat.PetCoin = request.PetCoin
 	cat.ReservationPrice = request.ReservationPrice
 	cat.AdoptionPrice = request.AdoptionPrice
@@ -140,6 +145,7 @@ type CatItem struct {
 	Name             string `form:"name" json:"name"`
 	Level            string `form:"level" json:"level"`
 	Price            int64  `form:"price" json:"price"`
+	Deposit          int64  `form:"deposit" json:"deposit"`
 	PetCoin          int64  `form:"pet_coin" json:"pet_coin"`
 	ReservationPrice int64  `form:"reservation_price" json:"reservation_price"`
 	AdoptionPrice    int64  `form:"adoption_price" json:"adoption_price"`
@@ -163,7 +169,7 @@ func (controller *CatController) GetCatList(context *gin.Context) {
 	var total int
 	var cats []orm.Cats
 	var request GetCatListRequest
-	var catsResponse []CatItem
+	var response GetCatListResponse
 	if err := context.Bind(&request); err != nil {
 		httputil.NewError(context, http.StatusBadRequest, err)
 		return
@@ -179,7 +185,7 @@ func (controller *CatController) GetCatList(context *gin.Context) {
 		return
 	}
 	for _, cat := range cats {
-		catsResponse = append(catsResponse, CatItem{
+		response.Cats = append(response.Cats, CatItem{
 			Id:               cat.ID,
 			Name:             cat.Name,
 			Level:            cat.Level,
@@ -193,12 +199,8 @@ func (controller *CatController) GetCatList(context *gin.Context) {
 			Status:           cat.Status,
 		})
 	}
-	context.JSON(http.StatusOK, &GetCatListResponse{
-		ListResponse: ListResponse{
-			Lower: request.Lower,
-			Upper: request.Upper,
-			Total: total,
-		},
-		Cats: catsResponse,
-	})
+	response.Lower = request.Lower
+	response.Upper = request.Upper
+	response.Total = total
+	context.JSON(http.StatusOK, &response)
 }

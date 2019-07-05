@@ -40,6 +40,7 @@ func (controller *UserController) PostUserLogin(context *gin.Context) {
 	}
 	if orm.Engine.Where("phone = ?", request.Phone).
 		Where("password = ?", request.Password).
+		Preload("Wallets").
 		First(&user).RecordNotFound() {
 		httputil.NewError(context, http.StatusUnauthorized, errors.New("account or password incorrect"))
 		return
@@ -52,6 +53,21 @@ func (controller *UserController) PostUserLogin(context *gin.Context) {
 		return
 	}
 	context.JSON(http.StatusOK, Message{Message: fmt.Sprintf("login success")})
+}
+
+// @Description user account logout
+// @Accept multipart/form-data
+// @Produce json
+// @Success 200 {object} controller.Message
+// @Failure 400 {object} httputil.HTTPError
+// @Failure 500 {object} httputil.HTTPError
+// @Router /api/v1/user/logout [post]
+func (controller *UserController) PostUserLogout(context *gin.Context) {
+	if err := session.Clear(context);err != nil{
+		httputil.NewError(context, http.StatusInternalServerError, err)
+		return
+	}
+	context.JSON(http.StatusOK, Message{Message: fmt.Sprintf("logout success")})
 }
 
 type PostUserRegisterRequest struct {
@@ -82,6 +98,16 @@ func (controller *UserController) PostUserRegister(context *gin.Context) {
 		httputil.NewError(context, http.StatusBadRequest, err)
 		return
 	}
+	sessionData := session.Get(context, session.UserSessionKey)
+	if sessionData != nil {
+		userSessionValue := sessionData.(session.UserSessionValue)
+		if userSessionValue.IsLogin {
+			httputil.NewError(context, http.StatusInternalServerError,
+				errors.New(
+					fmt.Sprintf("already login with another user userID=%d", userSessionValue.User.ID)))
+			return
+		}
+	}
 	if !orm.Engine.Where("phone = ?", request.Phone).
 		First(&orm.Users{}).RecordNotFound() {
 		httputil.NewError(context, http.StatusBadRequest, errors.New("phone already exist"))
@@ -98,7 +124,7 @@ func (controller *UserController) PostUserRegister(context *gin.Context) {
 		IdentifiedCode:   code[:15],
 		Status:           1,
 	}
-	if err := orm.Engine.Create(&user).Error; err != nil {
+	if err := orm.Engine.Preload("Users").Create(&user).Error; err != nil {
 		httputil.NewError(context, http.StatusInternalServerError, err)
 		return
 	}
@@ -157,7 +183,7 @@ func (controller *UserController) GetUserList(context *gin.Context) {
 	var total int
 	var users []orm.Users
 	var request GetUserListRequest
-	var usersResponse []UserItem
+	var response GetUserListResponse
 	if err := context.Bind(&request); err != nil {
 		httputil.NewError(context, http.StatusBadRequest, err)
 		return
@@ -169,19 +195,15 @@ func (controller *UserController) GetUserList(context *gin.Context) {
 		return
 	}
 	for _, user := range users {
-		usersResponse = append(usersResponse, UserItem{
+		response.Users = append(response.Users, UserItem{
 			Id:             user.ID,
 			UserName:       user.UserName,
 			Phone:          user.Phone,
 			IdentifiedCode: user.IdentifiedCode,
 		})
 	}
-	context.JSON(http.StatusOK, &GetUserListResponse{
-		ListResponse: ListResponse{
-			Lower: request.Lower,
-			Upper: request.Upper,
-			Total: total,
-		},
-		Users: usersResponse,
-	})
+	response.Lower = request.Lower
+	response.Upper = request.Upper
+	response.Total = total
+	context.JSON(http.StatusOK, &response)
 }

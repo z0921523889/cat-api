@@ -16,23 +16,35 @@ var list = [][]string{
 }
 
 func CheckDefaultAdmin() {
-	admin := Admins{}
-	err := Engine.First(&admin, 1).Error
+	err := Engine.Where("account = ?", "system").First(&Admins{}).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			admin.ID = 1
-			admin.Account = "system"
-			admin.Password = "system"
 			session := Engine.Begin()
-			if err := session.Create(&admin).Error; err != nil {
+			admin := Admins{
+				Account:  "system",
+				Password: "system",
+				Users: Users{
+					Phone:            "system",
+					UserName:         "system",
+					Password:         "system",
+					SecurityPassword: "system",
+					IdentifiedCode:   "system",
+					Wallets: Wallets{
+						Coin:    -1,
+						PetCoin: -1,
+					},
+					Status: 1,
+				},
+			}
+			if err := session.Create(&admin).Save(&admin).Error; err != nil {
 				session.Rollback()
 				log.Fatal("fail on create default admin")
 			}
 			for _, value := range list {
-				start, _ := format.ParseTime(value[0],format.TimeFormatter)
-				end, _ := format.ParseTime(value[1],format.TimeFormatter)
+				start, _ := format.ParseTime(value[0], format.TimeFormatter)
+				end, _ := format.ParseTime(value[1], format.TimeFormatter)
 				adminTimePeriodTemplate := AdminTimePeriodTemplates{
-					AdminId: 1,
+					AdminId: admin.ID,
 					StartAt: start,
 					EndAt:   end,
 				}
@@ -44,7 +56,7 @@ func CheckDefaultAdmin() {
 			if err := session.Commit().Error; err != nil {
 				log.Fatal("fail on commit default admin")
 			}
-		}else{
+		} else {
 			log.Fatal("fail on find default admin")
 		}
 	}

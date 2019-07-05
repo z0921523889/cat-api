@@ -9,11 +9,22 @@ defaultEntryPoints = ["http"]
 # 入口點設定
 ################################################################
 
-# 預設前端
 [entryPoints]
+# 預設前端
   [entryPoints.http]
   address = ":80"
 
+# traefik
+  [entryPoints.traefik]
+    address = ":9987"
+    compress = true
+
+    [entryPoints.traefik.auth.basic]
+        users = ["admin:$apr1$kPpB.YwX$aCjyPTc6zoU3N32E48QeU/"]
+
+[api]
+  entryPoint = "traefik"
+  dashboard = true
 ################################################################
 # Docker Provider
 ################################################################

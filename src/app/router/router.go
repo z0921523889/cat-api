@@ -12,6 +12,7 @@ var adminController = &controller.AdminController{}
 var userController = &controller.UserController{}
 var catController = &controller.CatController{}
 var catThumbnailController = &controller.CatThumbnailController{}
+var catWithUserController = &controller.CatWithUserController{}
 var timePeriodController = &controller.TimeScheduleController{}
 //middleware
 var userAuthMiddleware = &middleware.UserAuthMiddleware{}
@@ -52,6 +53,7 @@ func InitialRouterEngine() *gin.Engine {
 	userAuth := router.Group("api/v1").Use(middleware.GetHandlerFunc(userAuthMiddleware))
 	//user
 	userAuth.GET("/user/info", userController.GetUserInfo)
+	userAuth.POST("/user/logout", userController.PostUserLogout)
 	//cat
 	userAuth.GET("/cats", catController.GetCatList)
 	userAuth.GET("/cat/thumbnails", catThumbnailController.GetCatThumbnailList)
@@ -59,5 +61,7 @@ func InitialRouterEngine() *gin.Engine {
 	//schedules
 	userAuth.GET("/time/schedules", timePeriodController.GetTimeScheduleList)
 	userAuth.GET("/cats/time/schedules/:scheduleId", timePeriodController.GetTimeScheduleCat)
+	//cat_users
+	userAuth.POST("/cat/reservation", catWithUserController.PostCatReservations)
 	return router
 }

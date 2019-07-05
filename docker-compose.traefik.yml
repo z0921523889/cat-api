@@ -4,8 +4,14 @@ services:
   traefik:
     image: traefik
     container_name: traefik
+    labels:
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host:${DOMAIN_NAME}"
+      traefik.backend: "traefik"
+      traefik.port: "9987"
     ports:
       - 80:80
+      - 9987:9987
     networks:
       - traefik
     volumes:
@@ -50,7 +56,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - ${POSTGRES_PORT}
+      - ${POSTGRES_PORT}:${POSTGRES_PORT}
     volumes:
       - sys_postgres_db:/var/lib/postgresql/data
     networks:

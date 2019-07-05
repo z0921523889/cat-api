@@ -35,3 +35,9 @@ func Set(context *gin.Context, key string, value interface{}) error {
 	session.Set(key, value)
 	return session.Save()
 }
+
+func Clear(context *gin.Context) error {
+	session := sessions.Default(context)
+	session.Clear()
+	return session.Save()
+}
