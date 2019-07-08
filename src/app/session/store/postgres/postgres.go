@@ -87,7 +87,7 @@ func (store *SessionPostgresStore) Save(r *http.Request, w http.ResponseWriter, 
 // returns true if there is a sessoin data in DB
 func (store *SessionPostgresStore) load(session *sessions.Session) (bool, error) {
 	var count int
-	var sessionData orm.Sessions
+	var sessionData orm.Session
 	if err := orm.Engine.
 		Where("token = ?", store.keyPrefix+session.ID).
 		Where("expiry > ?", time.Now()).
@@ -115,9 +115,9 @@ func (store *SessionPostgresStore) save(session *sessions.Session) error {
 	}
 	token := store.keyPrefix + session.ID
 	expiry := time.Now().Add(time.Second * time.Duration(age))
-	var sessionData orm.Sessions
+	var sessionData orm.Session
 	if orm.Engine.First(&sessionData, "token = ?", token).RecordNotFound() {
-		sessionData = orm.Sessions{
+		sessionData = orm.Session{
 			Token:  store.keyPrefix + session.ID,
 			Data:   b,
 			Expiry: expiry,
@@ -137,7 +137,7 @@ func (store *SessionPostgresStore) save(session *sessions.Session) error {
 
 // delete removes keys from redis if MaxAge<0
 func (store *SessionPostgresStore) delete(session *sessions.Session) error {
-	if err := orm.Engine.Where("token LIKE ?", store.keyPrefix+session.ID).Delete(orm.Sessions{}).Error; err != nil {
+	if err := orm.Engine.Where("token LIKE ?", store.keyPrefix+session.ID).Delete(orm.Session{}).Error; err != nil {
 		return err
 	}
 	return nil

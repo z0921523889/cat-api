@@ -46,12 +46,12 @@ func (controller *TimeScheduleController) PostTimeSchedule(context *gin.Context)
 	if !orm.Engine.
 		Where("start_time = ?", startAt).
 		Where("end_time = ?", endAt).
-		First(&orm.AdoptionTimePeriods{}).
+		First(&orm.AdoptionTimePeriod{}).
 		RecordNotFound() {
 		httputil.NewError(context, http.StatusInternalServerError, err)
 		return
 	}
-	timePeriod := orm.AdoptionTimePeriods{
+	timePeriod := orm.AdoptionTimePeriod{
 		StartAt: startAt,
 		EndAt:   endAt,
 	}
@@ -91,7 +91,7 @@ type TimePeriodItem struct {
 // @Router /api/v1/time/schedules [get]
 func (controller *TimeScheduleController) GetTimeScheduleList(context *gin.Context) {
 	var total int
-	var timePeriods []orm.AdoptionTimePeriods
+	var timePeriods []orm.AdoptionTimePeriod
 	var request GetTimePeriodRequest
 	var response GetTimePeriodResponse
 	if err := context.Bind(&request); err != nil {
@@ -106,15 +106,16 @@ func (controller *TimeScheduleController) GetTimeScheduleList(context *gin.Conte
 	before := time
 	after := time.AddDate(0, 0, 1)
 	if err := orm.Engine.
-		Table("adoption_time_periods").Preload("Cats").
+		Table("adoption_time_period").
 		Where("start_time BETWEEN ? AND ?", before, after).
 		Count(&total).Limit(request.Upper - request.Lower + 1).Offset(request.Lower).
-		Find(&timePeriods).Error; err != nil {
+		Preload("Cats").Find(&timePeriods).Error; err != nil {
 		httputil.NewError(context, http.StatusInternalServerError, err)
 		return
 	}
+	response.TimePeriods = make([]TimePeriodItem, 0)
 	for _, timePeriod := range timePeriods {
-		var catList []CatItem
+		catList := make([]CatItem, 0)
 		for _, cat := range timePeriod.Cats {
 			catList = append(catList, CatItem{
 				Id:               cat.ID,
@@ -127,7 +128,7 @@ func (controller *TimeScheduleController) GetTimeScheduleList(context *gin.Conte
 				AdoptionPrice:    cat.AdoptionPrice,
 				ContractDays:     cat.ContractDays,
 				ContractBenefit:  cat.ContractBenefit,
-				CatThumbnailPath: fmt.Sprintf("/api/v1/cat/%d/thumbnail", cat.ID),
+				CatThumbnailPath: fmt.Sprintf("/api/v1/thumbnail/%d", cat.CatThumbnailId),
 			})
 		}
 		response.TimePeriods = append(response.TimePeriods, TimePeriodItem{

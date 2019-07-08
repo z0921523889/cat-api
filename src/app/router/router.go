@@ -57,7 +57,7 @@ func InitialRouterEngine() *gin.Engine {
 	//cat
 	userAuth.GET("/cats", catController.GetCatList)
 	userAuth.GET("/cat/thumbnails", catThumbnailController.GetCatThumbnailList)
-	userAuth.GET("/thumbnail/cats/:catId", catThumbnailController.GetCatThumbnail)
+	userAuth.GET("/thumbnail/:thumbnailId", catThumbnailController.GetCatThumbnail)
 	//schedules
 	userAuth.GET("/time/schedules", timePeriodController.GetTimeScheduleList)
 	userAuth.GET("/cats/time/schedules/:scheduleId", timePeriodController.GetTimeScheduleCat)

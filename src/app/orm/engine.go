@@ -23,16 +23,17 @@ func ConnectDBEngine() {
 	}
 	Engine.DB().SetMaxIdleConns(10)
 	Engine.AutoMigrate(
-		new(Sessions), new(ApplicationConfigs),
-		new(Admins),new(AdminProfiles),
-		new(Users),
-		new(Cats), new(CatThumbnails),
-		new(AdminTimePeriodTemplates), new(AdoptionTimePeriods), new(AdoptionTimePeriodCatPivots),
-		new(CatUserReservations),
-		new(Wallets),
+		new(Session), new(ApplicationConfig),
+		new(Admin),new(AdminProfile),
+		new(User),
+		new(Cat), new(CatThumbnail),
+		new(AdminTimePeriodTemplate), new(AdoptionTimePeriod), new(AdoptionTimePeriodCatPivot),
+		new(CatUserReservation),
+		new(Wallet),
 		)
 	Engine.LogMode(true)
 	CheckDefaultAdmin()
+	CheckDefaultAdminTimePeriodTemplate()
 }
 
 func CloseDBEngine() error {

@@ -33,14 +33,14 @@ type PostUserLoginRequest struct {
 // @Router /api/v1/user/login [post]
 func (controller *UserController) PostUserLogin(context *gin.Context) {
 	var request PostUserLoginRequest
-	var user orm.Users
+	var user orm.User
 	if err := context.Bind(&request); err != nil {
 		httputil.NewError(context, http.StatusBadRequest, err)
 		return
 	}
 	if orm.Engine.Where("phone = ?", request.Phone).
 		Where("password = ?", request.Password).
-		Preload("Wallets").
+		Preload("Wallet").
 		First(&user).RecordNotFound() {
 		httputil.NewError(context, http.StatusUnauthorized, errors.New("account or password incorrect"))
 		return
@@ -63,7 +63,7 @@ func (controller *UserController) PostUserLogin(context *gin.Context) {
 // @Failure 500 {object} httputil.HTTPError
 // @Router /api/v1/user/logout [post]
 func (controller *UserController) PostUserLogout(context *gin.Context) {
-	if err := session.Clear(context);err != nil{
+	if err := session.Clear(context); err != nil {
 		httputil.NewError(context, http.StatusInternalServerError, err)
 		return
 	}
@@ -109,22 +109,35 @@ func (controller *UserController) PostUserRegister(context *gin.Context) {
 		}
 	}
 	if !orm.Engine.Where("phone = ?", request.Phone).
-		First(&orm.Users{}).RecordNotFound() {
+		First(&orm.User{}).RecordNotFound() {
 		httputil.NewError(context, http.StatusBadRequest, errors.New("phone already exist"))
 		return
 	}
 	hash := sha1.New()
 	hash.Write([]byte(request.Phone + time.Now().String()))
 	code := base64.URLEncoding.EncodeToString(hash.Sum(nil))
-	user := orm.Users{
+	transition := orm.Engine.Begin()
+	wallet := orm.Wallet{}
+	if err := transition.Create(&wallet).Error; err != nil {
+		transition.Rollback()
+		httputil.NewError(context, http.StatusInternalServerError, err)
+		return
+	}
+	user := orm.User{
 		Phone:            request.Phone,
 		UserName:         request.UserName,
 		Password:         request.Password,
 		SecurityPassword: request.SecurityPassword,
 		IdentifiedCode:   code[:15],
 		Status:           1,
+		Wallet:           wallet,
 	}
-	if err := orm.Engine.Preload("Users").Create(&user).Error; err != nil {
+	if err := transition.Create(&user).Error; err != nil {
+		transition.Rollback()
+		httputil.NewError(context, http.StatusInternalServerError, err)
+		return
+	}
+	if err := transition.Commit().Error; err != nil {
 		httputil.NewError(context, http.StatusInternalServerError, err)
 		return
 	}
@@ -181,19 +194,20 @@ type UserItem struct {
 // @Router /api/v1/users [get]
 func (controller *UserController) GetUserList(context *gin.Context) {
 	var total int
-	var users []orm.Users
+	var users []orm.User
 	var request GetUserListRequest
 	var response GetUserListResponse
 	if err := context.Bind(&request); err != nil {
 		httputil.NewError(context, http.StatusBadRequest, err)
 		return
 	}
-	if err := orm.Engine.Table("users").Count(&total).
+	if err := orm.Engine.Table("user").Not("phone = ?", "system").Count(&total).
 		Limit(request.Upper - request.Lower + 1).Offset(request.Lower).
 		Find(&users).Error; err != nil {
 		httputil.NewError(context, http.StatusInternalServerError, err)
 		return
 	}
+	response.Users = make([]UserItem, 0)
 	for _, user := range users {
 		response.Users = append(response.Users, UserItem{
 			Id:             user.ID,

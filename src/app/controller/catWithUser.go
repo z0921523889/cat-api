@@ -29,44 +29,53 @@ type PostCatReservationRequest struct {
 // @Router /api/v1/cat/reservation [post]
 func (controller *CatWithUserController) PostCatReservations(context *gin.Context) {
 	var request PostCatReservationRequest
+	var user orm.User
+	var adoptionTimePeriodCatPivot orm.AdoptionTimePeriodCatPivot
 	if err := context.Bind(&request); err != nil {
 		httputil.NewError(context, http.StatusBadRequest, err)
 		return
 	}
 	sessionData := session.Get(context, session.UserSessionKey)
 	sessionValue := sessionData.(session.UserSessionValue)
-	var adoptionTimePeriodCatPivot orm.AdoptionTimePeriodCatPivots
-	if orm.Engine.Where("cats_id = ?", request.CatId).
-		Where("adoption_time_periods_id = ?", request.TimeScheduleId).
-		Preload("Cats").
+	if orm.Engine.Where("cat_id = ?", request.CatId).
+		Where("adoption_time_period_id = ?", request.TimeScheduleId).Preload("Cat").
 		First(&adoptionTimePeriodCatPivot).RecordNotFound() {
 		httputil.NewError(context, http.StatusInternalServerError, errors.New("cat record not found"))
 		return
 	}
-	if !orm.Engine.Table("cat_user_reservations").
-		Where("adoption_time_period_cat_pivots_id = ?", adoptionTimePeriodCatPivot.ID).
-		Where("users_id = ?", sessionValue.User.ID).
-		First(&orm.CatUserReservations{}).RecordNotFound() {
+	if adoptionTimePeriodCatPivot.Cat.Status != 1 {
+		httputil.NewError(context, http.StatusInternalServerError, errors.New("cat is not on sale"))
+		return
+	}
+	if !orm.Engine.Table("cat_user_reservation").
+		Where("adoption_time_period_cat_pivot_id = ?", adoptionTimePeriodCatPivot.ID).
+		Where("user_id = ?", sessionValue.User.ID).
+		First(&orm.CatUserReservation{}).RecordNotFound() {
 		httputil.NewError(context, http.StatusInternalServerError, errors.New("record already exist"))
 		return
 	}
-	if sessionValue.User.Wallets.Coin > 0 && sessionValue.User.Wallets.Coin < adoptionTimePeriodCatPivot.Cat.Deposit {
-		httputil.NewError(context, http.StatusInternalServerError, errors.New("user wallet does not have enough coin"))
+	if orm.Engine.Preload("Wallet").First(&user, sessionValue.User.ID).RecordNotFound() {
+		httputil.NewError(context, http.StatusInternalServerError, errors.New("user record not found"))
 		return
 	}
+	if user.Wallet.Coin >= 0 {
+		if user.Wallet.Coin < adoptionTimePeriodCatPivot.Cat.Deposit {
+			httputil.NewError(context, http.StatusInternalServerError, errors.New("user wallet does not have enough coin"))
+			return
+		}
+		user.Wallet.Coin -= adoptionTimePeriodCatPivot.Cat.Deposit
+	}
 	ormSession := orm.Engine.Begin()
-	catUserReservation := orm.CatUserReservations{
+	catUserReservation := orm.CatUserReservation{
 		AdoptionTimePeriodCatPivotsId: adoptionTimePeriodCatPivot.ID,
-		UsersId:                       sessionValue.User.ID,
+		UserId:                        sessionValue.User.ID,
 	}
 	if err := ormSession.Create(&catUserReservation).Error; err != nil {
 		ormSession.Rollback()
 		httputil.NewError(context, http.StatusInternalServerError, err)
 		return
 	}
-	wallet := sessionValue.User.Wallets
-	wallet.Coin -= adoptionTimePeriodCatPivot.Cat.Deposit
-	if err := ormSession.Save(&wallet).Error; err != nil {
+	if err := ormSession.Save(&user).Error; err != nil {
 		ormSession.Rollback()
 		httputil.NewError(context, http.StatusInternalServerError, err)
 		return

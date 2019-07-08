@@ -7,7 +7,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 	"github.com/swaggo/swag/example/celler/httputil"
-	"log"
 	"net/http"
 )
 
@@ -30,7 +29,7 @@ type PostAdminLoginRequest struct {
 // @Router /api/v1/admin/login [post]
 func (controller *AdminController) PostAdminLogin(context *gin.Context) {
 	var request PostAdminLoginRequest
-	var admin orm.Admins
+	var admin orm.Admin
 	if err := context.Bind(&request); err != nil {
 		httputil.NewError(context, http.StatusBadRequest, err)
 		return
@@ -38,12 +37,14 @@ func (controller *AdminController) PostAdminLogin(context *gin.Context) {
 	if orm.Engine.
 		Where("account = ?", request.Account).
 		Where("password = ?", request.Password).
-		Preloads("Users").
 		First(&admin).RecordNotFound() {
 		httputil.NewError(context, http.StatusUnauthorized, errors.New("account or password incorrect"))
 		return
 	}
-	log.Println("========================>",admin.Users)
+	if err := orm.Engine.Model(&admin).Related(&admin.User, "UserId").Error; err != nil {
+		httputil.NewError(context, http.StatusInternalServerError, err)
+		return
+	}
 	if err := session.Set(context, session.AdminSessionKey, session.AdminSessionValue{
 		IsLogin: true,
 		Admin:   admin,
@@ -53,7 +54,7 @@ func (controller *AdminController) PostAdminLogin(context *gin.Context) {
 	}
 	if err := session.Set(context, session.UserSessionKey, session.UserSessionValue{
 		IsLogin: true,
-		User:    admin.Users,
+		User:    admin.User,
 	}); err != nil {
 		httputil.NewError(context, http.StatusInternalServerError, err)
 		return

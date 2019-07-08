@@ -46,7 +46,7 @@ func (controller *CatController) PostCat(context *gin.Context) {
 		httputil.NewError(context, http.StatusBadRequest, err)
 		return
 	}
-	cat := orm.Cats{
+	cat := orm.Cat{
 		Name:             request.Name,
 		Level:            request.Level,
 		Price:            request.Price,
@@ -108,7 +108,7 @@ func (controller *CatController) PutModifyCat(context *gin.Context) {
 		httputil.NewError(context, http.StatusBadRequest, err)
 		return
 	}
-	var cat orm.Cats
+	var cat orm.Cat
 	if err := orm.Engine.First(&cat, catId).Error; err != nil {
 		httputil.NewError(context, http.StatusInternalServerError, err)
 		return
@@ -160,21 +160,21 @@ type CatItem struct {
 // @Produce json
 // @Param lower query int true "貓列表的lower"
 // @Param upper query int true "貓列表的upper"
-// @Param status query int true "貓列表的狀態(待放養 : 0/預約中 : 1/繁殖中 : 2/收養中 : 3)"
+// @Param status query int true "貓列表的狀態(系統代售中 : 1 / 待售中 : 2/預約中 : 3 /確認交易 :4 / 待交貨 : 5 /收養中 : 6)"
 // @Success 200 {object} controller.GetCatListResponse
 // @Failure 400 {object} httputil.HTTPError
 // @Failure 500 {object} httputil.HTTPError
 // @Router /api/v1/cats [get]
 func (controller *CatController) GetCatList(context *gin.Context) {
 	var total int
-	var cats []orm.Cats
+	var cats []orm.Cat
 	var request GetCatListRequest
 	var response GetCatListResponse
 	if err := context.Bind(&request); err != nil {
 		httputil.NewError(context, http.StatusBadRequest, err)
 		return
 	}
-	command := orm.Engine.Table("cats")
+	command := orm.Engine.Table("cat")
 	if request.Status > 0 {
 		command = command.Where("Status = ?", request.Status)
 	}
@@ -184,7 +184,12 @@ func (controller *CatController) GetCatList(context *gin.Context) {
 		httputil.NewError(context, http.StatusInternalServerError, err)
 		return
 	}
+	response.Cats = make([]CatItem,0)
 	for _, cat := range cats {
+		catThumbnailPath := ""
+		if cat.CatThumbnailId != 0 {
+			catThumbnailPath = fmt.Sprintf("/api/v1/thumbnail/%d", cat.CatThumbnailId)
+		}
 		response.Cats = append(response.Cats, CatItem{
 			Id:               cat.ID,
 			Name:             cat.Name,
@@ -195,7 +200,7 @@ func (controller *CatController) GetCatList(context *gin.Context) {
 			AdoptionPrice:    cat.AdoptionPrice,
 			ContractDays:     cat.ContractDays,
 			ContractBenefit:  cat.ContractBenefit,
-			CatThumbnailPath: fmt.Sprintf("/api/v1/thumbnail/cats/%d", cat.ID),
+			CatThumbnailPath: catThumbnailPath,
 			Status:           cat.Status,
 		})
 	}

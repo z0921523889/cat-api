@@ -4,6 +4,7 @@ import (
 	"cat-api/src/app/orm"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/pkg/errors"
 	"github.com/swaggo/swag/example/celler/httputil"
 	"net/http"
 	"strconv"
@@ -31,18 +32,18 @@ func (controller *TimeScheduleController) PostTimeScheduleCat(context *gin.Conte
 		httputil.NewError(context, http.StatusBadRequest, err)
 		return
 	}
-	var cat orm.Cats
-	var timePeriod orm.AdoptionTimePeriods
+	var cat orm.Cat
+	var timePeriod orm.AdoptionTimePeriod
 	if orm.Engine.First(&cat, catId).RecordNotFound() ||
 		orm.Engine.First(&timePeriod, scheduleId).RecordNotFound() ||
-		!orm.Engine.Where("cats_id = ?", catId).Where("adoption_time_periods_id = ?", scheduleId).
-			First(&orm.AdoptionTimePeriodCatPivots{}).RecordNotFound() {
-		httputil.NewError(context, http.StatusInternalServerError, err)
+		!orm.Engine.Where("cat_id = ?", catId).Where("adoption_time_period_id = ?", scheduleId).
+			First(&orm.AdoptionTimePeriodCatPivot{}).RecordNotFound() {
+		httputil.NewError(context, http.StatusInternalServerError, errors.New("can not find cat or schedule or pivot already exist"))
 		return
 	}
-	timePeriodCatPivot := orm.AdoptionTimePeriodCatPivots{
-		CatsId:                cat.ID,
-		AdoptionTimePeriodsId: timePeriod.ID,
+	timePeriodCatPivot := orm.AdoptionTimePeriodCatPivot{
+		CatId:                cat.ID,
+		AdoptionTimePeriodId: timePeriod.ID,
 	}
 	if err := orm.Engine.Create(&timePeriodCatPivot).Error; err != nil {
 		httputil.NewError(context, http.StatusInternalServerError, err)
@@ -72,9 +73,9 @@ type GetTimeScheduleCatResponse struct {
 // @Router /api/v1/cats/time/schedules/{scheduleId} [get]
 func (controller *TimeScheduleController) GetTimeScheduleCat(context *gin.Context) {
 	var total int
-	var cats []orm.Cats
+	var cats []orm.Cat
 	var catIds []uint
-	var timePeriod orm.AdoptionTimePeriods
+	var timePeriod orm.AdoptionTimePeriod
 	var request GetTimeScheduleCatRequest
 	var response GetTimeScheduleCatResponse
 	scheduleIdString := context.Param("scheduleId")
@@ -91,13 +92,14 @@ func (controller *TimeScheduleController) GetTimeScheduleCat(context *gin.Contex
 	for _, cat := range timePeriod.Cats {
 		catIds = append(catIds, cat.ID)
 	}
-	if err := orm.Engine.Table("cats").
+	if err := orm.Engine.Table("cat").
 		Where("Id in (?)", catIds).
 		Count(&total).Limit(request.Upper - request.Lower + 1).Offset(request.Lower).
 		Find(&cats).Error; err != nil {
 		httputil.NewError(context, http.StatusInternalServerError, err)
 		return
 	}
+	response.Cats = make([]CatItem, 0)
 	for _, cat := range cats {
 		response.Cats = append(response.Cats, CatItem{
 			Id:               cat.ID,

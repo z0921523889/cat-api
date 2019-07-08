@@ -12,12 +12,12 @@ var AdminSessionKey = "session_admin"
 
 type UserSessionValue struct {
 	IsLogin bool
-	User    orm.Users
+	User    orm.User
 }
 
 type AdminSessionValue struct {
 	IsLogin bool
-	Admin   orm.Admins
+	Admin   orm.Admin
 }
 
 func init()  {
