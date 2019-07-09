@@ -48,3 +48,7 @@ func (CatUserReservation) TableName() string {
 func (Wallet) TableName() string {
 	return "wallet"
 }
+
+func (Banner) TableName() string {
+	return "banner"
+}

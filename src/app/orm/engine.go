@@ -30,6 +30,7 @@ func ConnectDBEngine() {
 		new(AdminTimePeriodTemplate), new(AdoptionTimePeriod), new(AdoptionTimePeriodCatPivot),
 		new(CatUserReservation),
 		new(Wallet),
+		new(Banner),
 		)
 	Engine.LogMode(true)
 	CheckDefaultAdmin()

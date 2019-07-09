@@ -6,12 +6,17 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/swaggo/swag/example/celler/httputil"
+	"mime/multipart"
 	"net/http"
 	"strconv"
 )
 
 type CatThumbnailController struct {
 	FileController
+}
+
+type PostCatThumbnailRequest struct {
+	Thumbnail *multipart.FileHeader `form:"thumbnail" json:"thumbnail" binding:"required"`
 }
 
 // @Description insert or update cat thumbnail to the database
@@ -23,7 +28,12 @@ type CatThumbnailController struct {
 // @Failure 500 {object} httputil.HTTPError
 // @Router /api/v1/cat/thumbnail [post]
 func (controller *CatThumbnailController) PostCatThumbnail(context *gin.Context) {
-	data, err := controller.getBinaryDataFromForm(context, "thumbnail")
+	var request PostCatThumbnailRequest
+	if err := context.Bind(&request); err != nil {
+		httputil.NewError(context, http.StatusBadRequest, err)
+		return
+	}
+	data, err := controller.getBinaryDataFromMultipartFile(request.Thumbnail)
 	if err != nil {
 		httputil.NewError(context, http.StatusBadRequest, err)
 		return

@@ -103,3 +103,9 @@ type Wallet struct {
 	Coin       int64 `gorm:"type:integer;column:coin"`
 	PetCoin    int64 `gorm:"type:integer;column:pet_coin"`
 }
+
+type Banner struct {
+	gorm.Model `gorm:"embedded"`
+	Data       []byte `gorm:"type:bytea;column:data"`
+	Sort      int64  `gorm:"type:integer;column:sort"`
+}

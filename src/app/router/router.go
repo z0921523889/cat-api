@@ -14,6 +14,7 @@ var catController = &controller.CatController{}
 var catThumbnailController = &controller.CatThumbnailController{}
 var catWithUserController = &controller.CatWithUserController{}
 var timePeriodController = &controller.TimeScheduleController{}
+var bannerController = &controller.BannerController{}
 //middleware
 var userAuthMiddleware = &middleware.UserAuthMiddleware{}
 var adminMiddleware = &middleware.AdminAuthMiddleware{}
@@ -33,7 +34,6 @@ func InitialRouterEngine() *gin.Engine {
 	//Group v1
 	v1 := router.Group("api/v1")
 	// Group v1 non auth
-	v1.GET("/test", (&controller.EngineController{}).GetTest)
 	v1.POST("/user/register", userController.PostUserRegister)
 	v1.POST("/user/login", userController.PostUserLogin)
 	v1.POST("/admin/login", adminController.PostAdminLogin)
@@ -49,6 +49,9 @@ func InitialRouterEngine() *gin.Engine {
 	//schedules
 	adminAuth.POST("/time/schedule", timePeriodController.PostTimeSchedule)
 	adminAuth.POST("/time/schedules/:scheduleId/cat/:catId", timePeriodController.PostTimeScheduleCat)
+	//banner
+	adminAuth.POST("/banner", bannerController.PostBanner)
+	adminAuth.PUT("/banner/:bannerId", bannerController.PutModifyBanner)
 	// Group user auth
 	userAuth := router.Group("api/v1").Use(middleware.GetHandlerFunc(userAuthMiddleware))
 	//user
@@ -63,5 +66,8 @@ func InitialRouterEngine() *gin.Engine {
 	userAuth.GET("/cats/time/schedules/:scheduleId", timePeriodController.GetTimeScheduleCat)
 	//cat_users
 	userAuth.POST("/cat/reservation", catWithUserController.PostCatReservations)
+	//banner
+	userAuth.GET("/banners", bannerController.GetBannerList)
+	userAuth.GET("/banner/:bannerId", bannerController.GetBannerThumbnail)
 	return router
 }

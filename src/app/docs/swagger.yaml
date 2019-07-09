@@ -1,5 +1,14 @@
 basePath: '{{.BasePath}}'
 definitions:
+  controller.BannerItem:
+    properties:
+      cat_thumbnail_path:
+        type: string
+      id:
+        type: integer
+      order:
+        type: integer
+    type: object
   controller.CatItem:
     properties:
       adoption_price:
@@ -32,6 +41,19 @@ definitions:
       cat_thumbnail_path:
         type: string
       id:
+        type: integer
+    type: object
+  controller.GetBannerListResponse:
+    properties:
+      banners:
+        items:
+          $ref: '#/definitions/controller.BannerItem'
+        type: array
+      lower:
+        type: integer
+      total:
+        type: integer
+      upper:
         type: integer
     type: object
   controller.GetCatListResponse:
@@ -178,6 +200,140 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/controller.Message'
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+            type: object
+  /api/v1/banner:
+    post:
+      consumes:
+      - multipart/form-data
+      description: insert banner to the database
+      parameters:
+      - description: banner的縮圖檔案
+        in: formData
+        name: banner
+        required: true
+        type: file
+      - description: banner的排序
+        in: formData
+        name: order
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.Message'
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+            type: object
+  /api/v1/banner/{bannerId}:
+    get:
+      consumes:
+      - application/json
+      description: get banner thumbnail from the database
+      parameters:
+      - description: banner的ID
+        in: path
+        name: bannerId
+        required: true
+        type: integer
+      produces:
+      - image/jpeg
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+            type: object
+    put:
+      consumes:
+      - multipart/form-data
+      description: modify banner information to the database
+      parameters:
+      - description: banner的ID
+        in: path
+        name: bannerId
+        required: true
+        type: integer
+      - description: banner的縮圖檔案
+        in: formData
+        name: banner
+        required: true
+        type: file
+      - description: banner的排序
+        in: formData
+        name: order
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.Message'
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+            type: object
+  /api/v1/banners:
+    get:
+      consumes:
+      - application/json
+      description: get banner list from database
+      parameters:
+      - description: banner列表的lower
+        in: query
+        name: lower
+        required: true
+        type: integer
+      - description: banner列表的upper
+        in: query
+        name: upper
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.GetBannerListResponse'
             type: object
         "400":
           description: Bad Request
@@ -371,7 +527,8 @@ paths:
         name: upper
         required: true
         type: integer
-      - description: '貓列表的狀態(待放養 : 0/預約中 : 1/繁殖中 : 2/收養中 : 3)'
+      - description: '貓列表的狀態(系統代售中 : 1 / 待售中 : 2/預約中 : 3 /確認交易 :4 / 待交貨 : 5 /收養中 :
+          6)'
         in: query
         name: status
         required: true
@@ -512,7 +669,7 @@ paths:
           schema:
             $ref: '#/definitions/httputil.HTTPError'
             type: object
-  /api/v1/thumbnail/cats/{catId}:
+  /api/v1/thumbnail/{thumbnailId}:
     get:
       consumes:
       - application/json

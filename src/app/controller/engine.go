@@ -2,10 +2,10 @@ package controller
 
 import (
 	"bytes"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"io"
 	"io/ioutil"
+	"mime/multipart"
 	"net/http"
 )
 
@@ -21,12 +21,11 @@ func (controller *FileController) getBinaryDataFromBody(context *gin.Context) ([
 	return ioutil.ReadAll(body)
 }
 
-func (controller *FileController) getBinaryDataFromForm(context *gin.Context, fileName string) ([]byte, error) {
-	file, _, err := context.Request.FormFile(fileName)
+func (controller *FileController) getBinaryDataFromMultipartFile(fileHeader *multipart.FileHeader) ([]byte, error) {
+	file, err := fileHeader.Open()
 	if err != nil {
 		return nil, err
 	}
-
 	buf := bytes.NewBuffer(nil)
 	if _, err := io.Copy(buf, file); err != nil {
 		return nil, err
@@ -47,11 +46,4 @@ type ListResponse struct {
 
 type Message struct {
 	Message string `json:"message" example:"message"`
-}
-
-type EngineController struct {
-}
-
-func (controller *EngineController) GetTest(context *gin.Context) {
-	context.JSON(http.StatusOK, Message{Message: fmt.Sprintf("test on api engine...")})
 }
