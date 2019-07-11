@@ -45,10 +45,12 @@ func InitialRouterEngine() *gin.Engine {
 	adminAuth.POST("/cat", catController.PostCat)
 	adminAuth.PUT("/cats/:catId", catController.PutModifyCat)
 	adminAuth.POST("/cat/thumbnail", catThumbnailController.PostCatThumbnail)
-	adminAuth.POST("/thumbnails/:thumbnailId/cats/:catId", catThumbnailController.PostCatThumbnailBind)
+	adminAuth.POST("/cat/thumbnails/:thumbnailId/cats/:catId", catThumbnailController.PostCatThumbnailBind)
 	//schedules
 	adminAuth.POST("/time/schedule", timePeriodController.PostTimeSchedule)
 	adminAuth.POST("/time/schedules/:scheduleId/cat/:catId", timePeriodController.PostTimeScheduleCat)
+	//cat_users
+	adminAuth.PUT("/cat/adoption/owner", catWithUserController.PutAdoptionCatOwner)
 	//banner
 	adminAuth.POST("/banner", bannerController.PostBanner)
 	adminAuth.PUT("/banner/:bannerId", bannerController.PutModifyBanner)
@@ -60,7 +62,7 @@ func InitialRouterEngine() *gin.Engine {
 	//cat
 	userAuth.GET("/cats", catController.GetCatList)
 	userAuth.GET("/cat/thumbnails", catThumbnailController.GetCatThumbnailList)
-	userAuth.GET("/thumbnail/:thumbnailId", catThumbnailController.GetCatThumbnail)
+	userAuth.GET("/cat/thumbnail/:thumbnailId", catThumbnailController.GetCatThumbnail)
 	//schedules
 	userAuth.GET("/time/schedules", timePeriodController.GetTimeScheduleList)
 	userAuth.GET("/cats/time/schedules/:scheduleId", timePeriodController.GetTimeScheduleCat)

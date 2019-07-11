@@ -24,15 +24,16 @@ func ConnectDBEngine() {
 	Engine.DB().SetMaxIdleConns(10)
 	Engine.AutoMigrate(
 		new(Session), new(ApplicationConfig),
-		new(Admin),new(AdminProfile),
+		new(Admin), new(AdminProfile),
 		new(User),
 		new(Cat), new(CatThumbnail),
 		new(AdminTimePeriodTemplate), new(AdoptionTimePeriod), new(AdoptionTimePeriodCatPivot),
-		new(CatUserReservation),
+		new(CatUserReservation), new(CatUserTransfer), new(CatUserAdoption),
 		new(Wallet),
 		new(Banner),
-		)
+	)
 	Engine.LogMode(true)
+	Engine.Exec("")
 	CheckDefaultAdmin()
 	CheckDefaultAdminTimePeriodTemplate()
 }

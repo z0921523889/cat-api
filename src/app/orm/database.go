@@ -41,7 +41,8 @@ type User struct {
 	WalletId         uint   `gorm:"column:wallet_id"`
 	Wallet           Wallet `gorm:"foreignkey:WalletId"`
 	//state:       有效的 : 1 / 無效的 : 2/ 被封鎖的 : 3
-	Status int64 `gorm:"type:integer;not null;column:status"`
+	Status int64  `gorm:"type:integer;not null;column:status"`
+	Hint   string `gorm:"type:varchar(25);column:hint"`
 }
 
 type Cat struct {
@@ -55,7 +56,7 @@ type Cat struct {
 	AdoptionPrice    int64  `gorm:"type:integer;not null;column:adoption_price"`
 	ContractDays     int64  `gorm:"type:integer;not null;column:contract_days"`
 	ContractBenefit  int64  `gorm:"type:integer;not null;column:contract_benefit"`
-	//state:       系統代售中 : 1 / 待售中 : 2/預約中 : 3 /確認交易 :4 / 待交貨 : 5 /收養中 : 6
+	//state:       系統掛售中 : 1 / 期約到期掛售中 : 2/轉讓中 : 3 /領養增值中 :4
 	Status              int64                `gorm:"type:integer;not null;column:status"`
 	CatThumbnailId      uint                 `gorm:"column:cat_thumbnail_id"`
 	CatThumbnail        CatThumbnail         `gorm:"foreignkey:CatThumbnailId"`
@@ -77,8 +78,9 @@ type AdminTimePeriodTemplate struct {
 
 type AdoptionTimePeriod struct {
 	gorm.Model `gorm:"embedded"`
-	StartAt    time.Time `gorm:"not null;column:start_time"`
-	EndAt      time.Time `gorm:"not null;column:end_time"`
+	StartTime  time.Time `gorm:"not null;column:start_time"`
+	EndTime    time.Time `gorm:"not null;column:end_time"`
+	Done       bool      `gorm:"not null;column:done"`
 	Cats       []Cat     `gorm:"many2many:adoption_time_period_cat_pivot"`
 }
 
@@ -86,8 +88,10 @@ type AdoptionTimePeriodCatPivot struct {
 	gorm.Model           `gorm:"embedded"`
 	CatId                uint               `gorm:"column:cat_id"`
 	AdoptionTimePeriodId uint               `gorm:"column:adoption_time_period_id"`
+	UserId               uint               `gorm:"column:user_id"`
 	Cat                  Cat                `gorm:"foreignkey:CatId"`
 	AdoptionTimePeriod   AdoptionTimePeriod `gorm:"foreignkey:AdoptionTimePeriodId"`
+	User                 User               `gorm:"foreignkey:UserId"`
 }
 
 type CatUserReservation struct {
@@ -95,7 +99,30 @@ type CatUserReservation struct {
 	AdoptionTimePeriodCatPivotsId uint                       `gorm:"column:adoption_time_period_cat_pivot_id"`
 	UserId                        uint                       `gorm:"column:user_id"`
 	User                          User                       `gorm:"foreignkey:UserId"`
+	Coin                          int64                      `gorm:"type:integer;not null;column:coin"`
 	AdoptionTimePeriodCatPivot    AdoptionTimePeriodCatPivot `gorm:"foreignkey:AdoptionTimePeriodCatPivotId"`
+}
+
+type CatUserTransfer struct {
+	gorm.Model     `gorm:"embedded"`
+	OriginalUserId uint `gorm:"column:original_user_id"`
+	NewUserId      uint `gorm:"column:new_user_id"`
+	OriginalUser   User `gorm:"foreignkey:OriginalUserId"`
+	NewUser        User `gorm:"foreignkey:NewUserId"`
+	//state:       待交易: 1 / 買家已上傳憑證 : 2/已完成 :3
+	Status int64 `gorm:"type:integer;not null;column:status"`
+}
+
+type CatUserAdoption struct {
+	gorm.Model `gorm:"embedded"`
+	CatId      uint      `gorm:"column:cat_id"`
+	UserId     uint      `gorm:"column:user_id"`
+	StartTime  time.Time `gorm:"not null;column:start_time"`
+	EndTime    time.Time `gorm:"not null;column:end_time"`
+	//state:       增值中: 1 / 已完成 :2 / 已售出 : 3
+	Status int64 `gorm:"type:integer;not null;column:status"`
+	Cat    Cat   `gorm:"foreignkey:CatId"`
+	User   User  `gorm:"foreignkey:UserId"`
 }
 
 type Wallet struct {
@@ -107,5 +134,5 @@ type Wallet struct {
 type Banner struct {
 	gorm.Model `gorm:"embedded"`
 	Data       []byte `gorm:"type:bytea;column:data"`
-	Sort      int64  `gorm:"type:integer;column:sort"`
+	Sort       int64  `gorm:"type:integer;column:sort"`
 }

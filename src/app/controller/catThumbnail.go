@@ -106,7 +106,7 @@ func (controller *CatThumbnailController) GetCatThumbnailList(context *gin.Conte
 // @Success 200 {string} binary
 // @Failure 400 {object} httputil.HTTPError
 // @Failure 500 {object} httputil.HTTPError
-// @Router /api/v1/thumbnail/{thumbnailId} [get]
+// @Router /api/v1/cat/thumbnail/{thumbnailId} [get]
 func (controller *CatThumbnailController) GetCatThumbnail(context *gin.Context) {
 	thumbnailIdString := context.Param("thumbnailId")
 	thumbnailId, err := strconv.ParseUint(thumbnailIdString, 10, 32)
@@ -131,7 +131,7 @@ func (controller *CatThumbnailController) GetCatThumbnail(context *gin.Context) 
 // @Success 200 {object} controller.Message
 // @Failure 400 {object} httputil.HTTPError
 // @Failure 500 {object} httputil.HTTPError
-// @Router /api/v1/thumbnails/{thumbnailId}/cats/{catId} [post]
+// @Router /api/v1/cat/thumbnails/{thumbnailId}/cats/{catId} [post]
 func (controller *CatThumbnailController) PostCatThumbnailBind(context *gin.Context) {
 	catIdString := context.Param("catId")
 	catId, err := strconv.ParseUint(catIdString, 10, 32)

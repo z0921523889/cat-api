@@ -14,11 +14,13 @@ func (middleware *UserAuthMiddleware) Execute(context *gin.Context) {
 	userSessionData := session.Get(context, session.UserSessionKey)
 	if userSessionData != nil {
 		userSessionValue := userSessionData.(session.UserSessionValue)
-		if userSessionValue.IsLogin {
+		if userSessionValue.IsLogin && userSessionValue.User.Status == 1 {
 			return
 		}
+		httputil.NewError(context, http.StatusUnauthorized, errors.New("user has been blocked"))
+	}else{
+		httputil.NewError(context, http.StatusUnauthorized, errors.New("user does not authorized"))
 	}
-	httputil.NewError(context, http.StatusUnauthorized, errors.New("user does not authorized"))
 	context.Abort()
 }
 

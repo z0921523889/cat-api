@@ -14,5 +14,5 @@ func main() {
 	orm.ConnectDBEngine()
 	defer orm.CloseDBEngine()
 	conf.CheckDataBaseConfig()
-	schedule.GenerateTimePeriod()
+	schedule.AssignedMarketCat()
 }

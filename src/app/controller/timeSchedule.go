@@ -52,8 +52,9 @@ func (controller *TimeScheduleController) PostTimeSchedule(context *gin.Context)
 		return
 	}
 	timePeriod := orm.AdoptionTimePeriod{
-		StartAt: startAt,
-		EndAt:   endAt,
+		StartTime: startAt,
+		EndTime:   endAt,
+		Done:      false,
 	}
 	err = orm.Engine.Create(&timePeriod).Error
 	if err != nil {
@@ -133,8 +134,8 @@ func (controller *TimeScheduleController) GetTimeScheduleList(context *gin.Conte
 		}
 		response.TimePeriods = append(response.TimePeriods, TimePeriodItem{
 			Id:      timePeriod.ID,
-			StartAt: timePeriod.EndAt,
-			EndAt:   timePeriod.EndAt,
+			StartAt: timePeriod.StartTime,
+			EndAt:   timePeriod.EndTime,
 			Cats:    catList,
 		})
 	}

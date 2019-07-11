@@ -3,20 +3,12 @@ package schedule
 import (
 	"cat-api/src/app/conf"
 	"cat-api/src/app/orm"
-	"github.com/robfig/cron"
 	"log"
 	"strconv"
 	"time"
 )
 
-func StartScheduleJobs() {
-	c := cron.New()
-	c.AddFunc("@monthly", GenerateTimePeriod)
-	c.Start()
-}
-
 func GenerateTimePeriod() {
-	log.Println("run generateTimePeriod")
 	admin := orm.Admin{}
 	var templates []orm.AdminTimePeriodTemplate
 	id, err := strconv.Atoi(conf.DefaultConfig["TimePeriodTemplateAdminId"])
@@ -24,6 +16,7 @@ func GenerateTimePeriod() {
 		id = 1
 	}
 	if err := orm.Engine.First(&admin, id).Related(&templates, "AdminId").Error; err != nil {
+		log.Println("can not find default admin for time period template")
 		return
 	}
 	monthLater := time.Now().AddDate(0, 1, 0)
@@ -58,8 +51,8 @@ func GenerateTimePeriod() {
 				First(&orm.AdoptionTimePeriod{}).
 				RecordNotFound() {
 				if err := session.Create(&orm.AdoptionTimePeriod{
-					StartAt: start,
-					EndAt:   end,
+					StartTime: start,
+					EndTime:   end,
 				}).Error; err != nil {
 					session.Rollback()
 				}

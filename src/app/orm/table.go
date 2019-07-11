@@ -45,6 +45,10 @@ func (CatUserReservation) TableName() string {
 	return "cat_user_reservation"
 }
 
+func (CatUserTransfer) TableName() string {
+	return "cat_user_transfer"
+}
+
 func (Wallet) TableName() string {
 	return "wallet"
 }
