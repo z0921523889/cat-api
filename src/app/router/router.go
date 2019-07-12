@@ -4,8 +4,10 @@ import (
 	"cat-api/src/app/controller"
 	"cat-api/src/app/middleware"
 	"cat-api/src/app/session/store/postgres"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"time"
 )
 
 var adminController = &controller.AdminController{}
@@ -22,7 +24,18 @@ var adminMiddleware = &middleware.AdminAuthMiddleware{}
 func InitialRouterEngine() *gin.Engine {
 	router := gin.Default()
 	router.MaxMultipartMemory = 1
-	// set up session using cookie
+	// set up cors
+	router.Use(cors.New(cors.Config{
+		AllowOriginFunc: func(origin string) bool {
+			return true
+		},
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD","OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Length", "Accept", "Content-Type","Access-Control-Allow-Origin"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
+	// set up session using cookie & postgres
 	store, _ := postgres.NewPostgresStore([]byte("secret"))
 	router.Use(sessions.Sessions("cat_session", store))
 	// Global middleware
