@@ -47,9 +47,11 @@ func AssignedMarketCat() {
 					return
 				}
 				catUserTransfer := orm.CatUserTransfer{
+					CatId:          cat.ID,
 					OriginalUserId: catUserAdoption.UserId,
 					NewUserId:      adoptionTimePeriodCatPivot.UserId,
 					Status:         1,
+					StartTime:      time.Now(),
 				}
 				cat.Status = 3
 				if err := ormSession.Create(&catUserTransfer).Save(&cat).

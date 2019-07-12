@@ -81,6 +81,7 @@ func InitialRouterEngine() *gin.Engine {
 	userAuth.GET("/cats/time/schedules/:scheduleId", timePeriodController.GetTimeScheduleCat)
 	//cat_users
 	userAuth.POST("/cat/reservation", catWithUserController.PostCatReservations)
+	userAuth.GET("/transfer/cats", catWithUserController.GetTransferCatList)
 	//banner
 	userAuth.GET("/banners", bannerController.GetBannerList)
 	userAuth.GET("/banner/:bannerId", bannerController.GetBannerThumbnail)

@@ -105,12 +105,16 @@ type CatUserReservation struct {
 
 type CatUserTransfer struct {
 	gorm.Model     `gorm:"embedded"`
+	CatId          uint `gorm:"column:cat_id"`
 	OriginalUserId uint `gorm:"column:original_user_id"`
 	NewUserId      uint `gorm:"column:new_user_id"`
+	Cat            Cat  `gorm:"foreignkey:CatId"`
 	OriginalUser   User `gorm:"foreignkey:OriginalUserId"`
 	NewUser        User `gorm:"foreignkey:NewUserId"`
 	//state:       待交易: 1 / 買家已上傳憑證 : 2/已完成 :3
-	Status int64 `gorm:"type:integer;not null;column:status"`
+	Status    int64     `gorm:"type:integer;not null;column:status"`
+	StartTime time.Time `gorm:"column:start_time"`
+	EndTime   time.Time `gorm:"column:end_time"`
 }
 
 type CatUserAdoption struct {
