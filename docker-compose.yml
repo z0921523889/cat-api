@@ -9,7 +9,7 @@ services:
     container_name: ${TYPE}_${PROJECT_NAME}_web_api
     labels:
       traefik.enable: "true"
-      traefik.frontend.rule: "Host:${DOMAIN_NAME}"
+      traefik.frontend.rule: "Host:${FULL_PATH_DOMAIN_NAME}"
       traefik.backend: "${TYPE}-${PROJECT_NAME}-web-api"
       traefik.port: "${APPLICATION_PORT}"
     depends_on:
