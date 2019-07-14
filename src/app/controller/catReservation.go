@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-type CatWithUserController struct {
+type CatReservationController struct {
 }
 
 type PostCatReservationRequest struct {
@@ -28,7 +28,7 @@ type PostCatReservationRequest struct {
 // @Failure 400 {object} httputil.HTTPError
 // @Failure 500 {object} httputil.HTTPError
 // @Router /api/v1/cat/reservation [post]
-func (controller *CatWithUserController) PostCatReservations(context *gin.Context) {
+func (controller *CatReservationController) PostCatReservations(context *gin.Context) {
 	var request PostCatReservationRequest
 	var user orm.User
 	var adoptionTimePeriodCatPivot orm.AdoptionTimePeriodCatPivot
@@ -45,8 +45,16 @@ func (controller *CatWithUserController) PostCatReservations(context *gin.Contex
 		httputil.NewError(context, http.StatusInternalServerError, errors.New("cat record not found"))
 		return
 	}
-	if adoptionTimePeriodCatPivot.Cat.Status != 1 {
+	if adoptionTimePeriodCatPivot.Cat.Status != 1 && adoptionTimePeriodCatPivot.Cat.Status != 2 {
 		httputil.NewError(context, http.StatusInternalServerError, errors.New("cat is not on sale"))
+		return
+	}
+
+	if !orm.Engine.Where("user_id = ?", sessionValue.User.ID).
+		Where("cat_id = ?", adoptionTimePeriodCatPivot.Cat.ID).
+		Not("status = ?", 3).
+		First(&orm.CatUserAdoption{}).RecordNotFound() {
+		httputil.NewError(context, http.StatusInternalServerError, errors.New("can not reservations your own cat"))
 		return
 	}
 	if !orm.Engine.Table("cat_user_reservation").
@@ -121,7 +129,7 @@ type PutAdoptionCatOwnerRequest struct {
 // @Failure 400 {object} httputil.HTTPError
 // @Failure 500 {object} httputil.HTTPError
 // @Router /api/v1/cat/adoption/owner [put]
-func (controller *CatWithUserController) PutAdoptionCatOwner(context *gin.Context) {
+func (controller *CatReservationController) PutAdoptionCatOwner(context *gin.Context) {
 	var request PutAdoptionCatOwnerRequest
 	var adoptionTimePeriodCatPivot orm.AdoptionTimePeriodCatPivot
 	if err := context.Bind(&request); err != nil {
@@ -135,7 +143,9 @@ func (controller *CatWithUserController) PutAdoptionCatOwner(context *gin.Contex
 		httputil.NewError(context, http.StatusInternalServerError, errors.New("cat record not found"))
 		return
 	}
-	if orm.Engine.First(&orm.User{}).RecordNotFound() {
+	if orm.Engine.Where("adoption_time_period_cat_pivot_id = ?", adoptionTimePeriodCatPivot.ID).
+		Where("user_id = ?", request.UserId).
+		First(&orm.CatUserReservation{}).RecordNotFound() {
 		httputil.NewError(context, http.StatusInternalServerError, errors.New("user record not found"))
 		return
 	}
@@ -145,86 +155,4 @@ func (controller *CatWithUserController) PutAdoptionCatOwner(context *gin.Contex
 		return
 	}
 	context.JSON(http.StatusOK, Message{Message: fmt.Sprintf("adoption cat will be assigned to user after end of timeline,userID=%d", request.UserId)})
-}
-
-type GetTransferCatListRequest struct {
-	ListRequest
-	Status int `form:"status" json:"status"`
-}
-
-type GetTransferCatListResponse struct {
-	ListResponse
-	TransferCatItems []TransferCatItem `form:"transfer_cats" json:"transfer_cats"`
-}
-
-type TransferCatItem struct {
-	Id              uint      `form:"id" json:"id"`
-	CatName         string    `form:"cat_name" json:"cat_name"`
-	Price           int64     `form:"price" json:"price"`
-	ContractDays    int64     `form:"contract_days" json:"contract_days"`
-	ContractBenefit int64     `form:"contract_benefit" json:"contract_benefit"`
-	StartAt         time.Time `form:"start_at" json:"start_at"`
-	EndAt           time.Time `form:"end_at" json:"end_at"`
-	SellerName      string    `form:"seller_name" json:"seller_name"`
-	BuyerName       string    `form:"buyer_name" json:"buyer_name"`
-	SellerPhone     string    `form:"seller_phone" json:"seller_phone"`
-	BuyerPhone      string    `form:"buyer_phone" json:"buyer_phone"`
-}
-
-// @Description get transfer cat list with status from database
-// @Accept json
-// @Produce json
-// @Param lower query int true "貓列表的lower"
-// @Param upper query int true "貓列表的upper"
-// @Param status query int true "貓列表的交易狀態(待交易: 1 / 買家已上傳憑證 : 2/已完成 :3)"
-// @Success 200 {object} controller.GetCatListResponse
-// @Failure 400 {object} httputil.HTTPError
-// @Failure 500 {object} httputil.HTTPError
-// @Router /api/v1/transfer/cats [get]
-func (controller *CatWithUserController) GetTransferCatList(context *gin.Context) {
-	var total int
-	var catUserTransfers []orm.CatUserTransfer
-	var request GetTransferCatListRequest
-	var response GetTransferCatListResponse
-	if err := context.Bind(&request); err != nil {
-		httputil.NewError(context, http.StatusBadRequest, err)
-		return
-	}
-	sessionData := session.Get(context, session.UserSessionKey)
-	sessionValue := sessionData.(session.UserSessionValue)
-
-	command := orm.Engine.Table("cat_user_transfer")
-	if request.Status > 0 {
-		command = command.Where("status = ?", request.Status)
-	}
-	command = command.
-		Where("original_user_id = ?", sessionValue.User.ID).
-		Or("new_user_id = ?", sessionValue.User.ID).
-		Preload("Cat").Preload("OriginalUser").Preload("NewUser")
-	if err := command.Count(&total).
-		Limit(request.Upper - request.Lower + 1).Offset(request.Lower).
-		Find(&catUserTransfers).Error; err != nil {
-		httputil.NewError(context, http.StatusInternalServerError, err)
-		return
-	}
-	response.TransferCatItems = make([]TransferCatItem, 0)
-	for _, catUserTransfer := range catUserTransfers {
-		response.TransferCatItems = append(response.TransferCatItems, TransferCatItem{
-			Id:              catUserTransfer.ID,
-			CatName:         catUserTransfer.Cat.Name,
-			Price:           catUserTransfer.Cat.Price,
-			ContractDays:    catUserTransfer.Cat.ContractDays,
-			ContractBenefit: catUserTransfer.Cat.ContractBenefit,
-			StartAt:         catUserTransfer.StartTime,
-			EndAt:           catUserTransfer.EndTime,
-			SellerName:      catUserTransfer.OriginalUser.UserName,
-			BuyerName:       catUserTransfer.NewUser.UserName,
-			SellerPhone:     catUserTransfer.OriginalUser.Phone,
-			BuyerPhone:      catUserTransfer.NewUser.Phone,
-		})
-	}
-	response.Lower = request.Lower
-	response.Upper = request.Upper
-	response.Total = total
-	context.JSON(http.StatusOK, &response)
 }

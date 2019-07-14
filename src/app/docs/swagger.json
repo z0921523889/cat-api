@@ -60,6 +60,63 @@
                 }
             }
         },
+        "/api/v1/adoption/cats": {
+            "get": {
+                "description": "get adoption cat list with status from database",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "貓列表的lower",
+                        "name": "lower",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "貓列表的upper",
+                        "name": "upper",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "貓列表的領養狀態(  增值中: 1 / 已完成 :2 / 已售出 : 3)",
+                        "name": "status",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/controller.GetCatListResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/httputil.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/httputil.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/banner": {
             "post": {
                 "description": "insert banner to the database",
@@ -356,6 +413,63 @@
                 }
             }
         },
+        "/api/v1/cat/adoption/owner": {
+            "put": {
+                "description": "modify adoption cat owner",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "貓的ID識別",
+                        "name": "cat_id",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "時段的ID識別",
+                        "name": "time_schedule_id",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "用戶的ID識別",
+                        "name": "user_id",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/controller.Message"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/httputil.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/httputil.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/cat/reservation": {
             "post": {
                 "description": "Add a new cat_user_reservation",
@@ -449,6 +563,48 @@
                 }
             }
         },
+        "/api/v1/cat/thumbnail/{thumbnailId}": {
+            "get": {
+                "description": "get cat thumbnail from the database",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "image/jpeg"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "貓的縮圖ID",
+                        "name": "thumbnailId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/httputil.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/httputil.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/cat/thumbnails": {
             "get": {
                 "description": "get cat thumbnail list from the database",
@@ -499,6 +655,56 @@
                 }
             }
         },
+        "/api/v1/cat/thumbnails/{thumbnailId}/cats/{catId}": {
+            "post": {
+                "description": "link cat thumbnail with cat to the database",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "貓的ID",
+                        "name": "catId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "貓的縮圖ID",
+                        "name": "thumbnailId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/controller.Message"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/httputil.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/httputil.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/cats": {
             "get": {
                 "description": "get cat list with status from database",
@@ -525,7 +731,7 @@
                     },
                     {
                         "type": "integer",
-                        "description": "貓列表的狀態(系統代售中 : 1 / 待售中 : 2/預約中 : 3 /確認交易 :4 / 待交貨 : 5 /收養中 : 6)",
+                        "description": "貓列表的狀態(系統掛售中 : 1 / 期約到期掛售中 : 2/轉讓中 : 3 /領養增值中 :4 / 等待裂變中 :5)",
                         "name": "status",
                         "in": "query",
                         "required": true
@@ -695,7 +901,7 @@
                     },
                     {
                         "type": "string",
-                        "description": "貓的狀態(系統代售中 : 1 / 待售中 : 2/預約中 : 3 /確認交易 :4 / 待交貨 : 5 /收養中 : 6)",
+                        "description": "貓的狀態(系統掛售中 : 1 / 期約到期掛售中 : 2/轉讓中 : 3 /領養增值中 :4 / 等待裂變中 :5)",
                         "name": "status",
                         "in": "formData",
                         "required": true
@@ -726,9 +932,9 @@
                 }
             }
         },
-        "/api/v1/thumbnail/{thumbnailId}": {
+        "/api/v1/certificate/transfer/{transferId}": {
             "get": {
-                "description": "get cat thumbnail from the database",
+                "description": "get transfer cat certificate thumbnail from the database",
                 "consumes": [
                     "application/json"
                 ],
@@ -738,8 +944,8 @@
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "貓的ID",
-                        "name": "catId",
+                        "description": "transfer的ID",
+                        "name": "transferId",
                         "in": "path",
                         "required": true
                     }
@@ -749,56 +955,6 @@
                         "description": "OK",
                         "schema": {
                             "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "$ref": "#/definitions/httputil.HTTPError"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "$ref": "#/definitions/httputil.HTTPError"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/thumbnails/{thumbnailId}/cats/{catId}": {
-            "post": {
-                "description": "link cat thumbnail with cat to the database",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "貓的ID",
-                        "name": "catId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "貓的縮圖ID",
-                        "name": "thumbnailId",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "$ref": "#/definitions/controller.Message"
                         }
                     },
                     "400": {
@@ -956,6 +1112,155 @@
                         "schema": {
                             "type": "object",
                             "$ref": "#/definitions/controller.Message"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/httputil.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/httputil.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/transfer/cats": {
+            "get": {
+                "description": "get transfer cat list with status from database",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "貓列表的lower",
+                        "name": "lower",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "貓列表的upper",
+                        "name": "upper",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "貓列表的交易狀態( 待交易: 1 / 買家已上傳憑證 : 2/已完成 :3 /已取消)",
+                        "name": "status",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/controller.GetCatListResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/httputil.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/httputil.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/transfer/{transferId}/certificate": {
+            "post": {
+                "description": "post transfer cat certificate to database",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "transfer的ID",
+                        "name": "transferId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "certificate的縮圖檔案",
+                        "name": "certificate",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/controller.Message"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/httputil.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/httputil.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/transfer/{transferId}/migrate": {
+            "post": {
+                "description": "post transfer cat migrate to the database",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "transfer的ID",
+                        "name": "transferId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
                         }
                     },
                     "400": {

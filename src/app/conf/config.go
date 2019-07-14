@@ -12,6 +12,8 @@ func init() {
 	DefaultConfig = make(map[string]string)
 	DefaultConfig["TimePeriodMaxCatAmount"] = "5"
 	DefaultConfig["TimePeriodTemplateAdminId"] = "1"
+	DefaultConfig["CatTransferDuration"] = "2"
+	DefaultConfig["MaxPriceOfCat"] = "18000"
 }
 
 func CheckDataBaseConfig() {

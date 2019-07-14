@@ -54,7 +54,6 @@ func (controller *TimeScheduleController) PostTimeSchedule(context *gin.Context)
 	timePeriod := orm.AdoptionTimePeriod{
 		StartTime: startAt,
 		EndTime:   endAt,
-		Done:      false,
 	}
 	err = orm.Engine.Create(&timePeriod).Error
 	if err != nil {
@@ -129,7 +128,7 @@ func (controller *TimeScheduleController) GetTimeScheduleList(context *gin.Conte
 				AdoptionPrice:    cat.AdoptionPrice,
 				ContractDays:     cat.ContractDays,
 				ContractBenefit:  cat.ContractBenefit,
-				CatThumbnailPath: fmt.Sprintf("/api/v1/thumbnail/%d", cat.CatThumbnailId),
+				CatThumbnailPath: fmt.Sprintf("/api/v1/cat/thumbnail/%d", cat.CatThumbnailId),
 			})
 		}
 		response.TimePeriods = append(response.TimePeriods, TimePeriodItem{

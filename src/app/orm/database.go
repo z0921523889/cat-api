@@ -56,7 +56,7 @@ type Cat struct {
 	AdoptionPrice    int64  `gorm:"type:integer;not null;column:adoption_price"`
 	ContractDays     int64  `gorm:"type:integer;not null;column:contract_days"`
 	ContractBenefit  int64  `gorm:"type:integer;not null;column:contract_benefit"`
-	//state:       系統掛售中 : 1 / 期約到期掛售中 : 2/轉讓中 : 3 /領養增值中 :4
+	//state:       系統掛售中 : 1 / 期約到期掛售中 : 2/轉讓中 : 3 /領養增值中 :4 / 等待裂變中 :5
 	Status              int64                `gorm:"type:integer;not null;column:status"`
 	CatThumbnailId      uint                 `gorm:"column:cat_thumbnail_id"`
 	CatThumbnail        CatThumbnail         `gorm:"foreignkey:CatThumbnailId"`
@@ -80,18 +80,18 @@ type AdoptionTimePeriod struct {
 	gorm.Model `gorm:"embedded"`
 	StartTime  time.Time `gorm:"not null;column:start_time"`
 	EndTime    time.Time `gorm:"not null;column:end_time"`
-	Done       bool      `gorm:"not null;column:done"`
 	Cats       []Cat     `gorm:"many2many:adoption_time_period_cat_pivot"`
 }
 
 type AdoptionTimePeriodCatPivot struct {
 	gorm.Model           `gorm:"embedded"`
-	CatId                uint               `gorm:"column:cat_id"`
-	AdoptionTimePeriodId uint               `gorm:"column:adoption_time_period_id"`
-	UserId               uint               `gorm:"column:user_id"`
-	Cat                  Cat                `gorm:"foreignkey:CatId"`
-	AdoptionTimePeriod   AdoptionTimePeriod `gorm:"foreignkey:AdoptionTimePeriodId"`
-	User                 User               `gorm:"foreignkey:UserId"`
+	CatId                uint                 `gorm:"column:cat_id"`
+	AdoptionTimePeriodId uint                 `gorm:"column:adoption_time_period_id"`
+	UserId               uint                 `gorm:"column:user_id"`
+	Cat                  Cat                  `gorm:"foreignkey:CatId"`
+	AdoptionTimePeriod   AdoptionTimePeriod   `gorm:"foreignkey:AdoptionTimePeriodId"`
+	User                 User                 `gorm:"foreignkey:UserId"`
+	CatUserReservations  []CatUserReservation `gorm:"foreignkey:AdoptionTimePeriodCatPivotsId"`
 }
 
 type CatUserReservation struct {
@@ -104,17 +104,18 @@ type CatUserReservation struct {
 }
 
 type CatUserTransfer struct {
-	gorm.Model     `gorm:"embedded"`
-	CatId          uint `gorm:"column:cat_id"`
-	OriginalUserId uint `gorm:"column:original_user_id"`
-	NewUserId      uint `gorm:"column:new_user_id"`
-	Cat            Cat  `gorm:"foreignkey:CatId"`
-	OriginalUser   User `gorm:"foreignkey:OriginalUserId"`
-	NewUser        User `gorm:"foreignkey:NewUserId"`
-	//state:       待交易: 1 / 買家已上傳憑證 : 2/已完成 :3
-	Status    int64     `gorm:"type:integer;not null;column:status"`
-	StartTime time.Time `gorm:"column:start_time"`
-	EndTime   time.Time `gorm:"column:end_time"`
+	gorm.Model                    `gorm:"embedded"`
+	AdoptionTimePeriodCatPivotId uint                       `gorm:"column:adoption_time_period_cat_pivot_id"`
+	CatUserAdoptionId             uint                       `gorm:"column:cat_user_adoption_id"`
+	UserId                        uint                       `gorm:"column:user_id"`
+	AdoptionTimePeriodCatPivot    AdoptionTimePeriodCatPivot `gorm:"foreignkey:AdoptionTimePeriodCatPivotId"`
+	CatUserAdoption               CatUserAdoption            `gorm:"foreignkey:CatUserAdoptionId"`
+	User                          User                       `gorm:"foreignkey:UserId"`
+	//state:       待交易: 1 / 買家已上傳憑證 : 2/已完成 :3 /已取消
+	Status      int64     `gorm:"type:integer;not null;column:status"`
+	Certificate []byte    `gorm:"type:bytea;column:certificate"`
+	StartTime   time.Time `gorm:"column:start_time"`
+	EndTime     time.Time `gorm:"column:end_time"`
 }
 
 type CatUserAdoption struct {
@@ -139,4 +140,12 @@ type Banner struct {
 	gorm.Model `gorm:"embedded"`
 	Data       []byte `gorm:"type:bytea;column:data"`
 	Sort       int64  `gorm:"type:integer;column:sort"`
+}
+
+type ExecuteTask struct {
+	gorm.Model  `gorm:"embedded"`
+	ExecuteType int64     `gorm:"type:integer;not null;column:execute_type"`
+	ExecuteTime time.Time `gorm:"not null;column:execute_time"`
+	Data        []byte    `gorm:"type:bytea;column:data"`
+	Done        bool      `gorm:"not null;column:done"`
 }

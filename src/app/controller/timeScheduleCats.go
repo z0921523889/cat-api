@@ -2,6 +2,8 @@ package controller
 
 import (
 	"cat-api/src/app/orm"
+	"cat-api/src/app/schedule"
+	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
@@ -32,6 +34,7 @@ func (controller *TimeScheduleController) PostTimeScheduleCat(context *gin.Conte
 		httputil.NewError(context, http.StatusBadRequest, err)
 		return
 	}
+	ormSession := orm.Engine.Begin()
 	var cat orm.Cat
 	var timePeriod orm.AdoptionTimePeriod
 	if orm.Engine.First(&cat, catId).RecordNotFound() ||
@@ -45,10 +48,33 @@ func (controller *TimeScheduleController) PostTimeScheduleCat(context *gin.Conte
 		CatId:                cat.ID,
 		AdoptionTimePeriodId: timePeriod.ID,
 	}
-	if err := orm.Engine.Create(&timePeriodCatPivot).Error; err != nil {
+	if err := ormSession.Create(&timePeriodCatPivot).Error; err != nil {
+		ormSession.Rollback()
 		httputil.NewError(context, http.StatusInternalServerError, err)
 		return
 	}
+	assignedMarketCatTaskData := schedule.AssignedMarketCatTaskData{
+		AdoptionTimePeriodId: int(timePeriod.ID),
+		CatId:                int(cat.ID),
+	}
+	data, err := json.Marshal(assignedMarketCatTaskData)
+	if err != nil {
+		ormSession.Rollback()
+		httputil.NewError(context, http.StatusInternalServerError, err)
+		return
+	}
+	executeTask := orm.ExecuteTask{
+		ExecuteType: schedule.AssignedMarketCat,
+		ExecuteTime: timePeriod.EndTime,
+		Data:        data,
+		Done:        false,
+	}
+	if err := ormSession.Create(&executeTask).Error; err != nil {
+		ormSession.Rollback()
+		httputil.NewError(context, http.StatusInternalServerError, err)
+		return
+	}
+	ormSession.Commit()
 	context.JSON(http.StatusOK, Message{Message: fmt.Sprintf("insert timePeriodCatPivot complete timePeriodCatPivotID=%d", timePeriodCatPivot.ID)})
 }
 
@@ -111,7 +137,7 @@ func (controller *TimeScheduleController) GetTimeScheduleCat(context *gin.Contex
 			AdoptionPrice:    cat.AdoptionPrice,
 			ContractDays:     cat.ContractDays,
 			ContractBenefit:  cat.ContractBenefit,
-			CatThumbnailPath: fmt.Sprintf("/api/v1/thumbnail/cats/%d", cat.ID),
+			CatThumbnailPath: fmt.Sprintf("/api/v1/cat/thumbnail/%d", cat.ID),
 		})
 	}
 	response.Lower = request.Lower

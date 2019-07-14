@@ -52,6 +52,13 @@ func (controller *UserController) PostUserLogin(context *gin.Context) {
 		httputil.NewError(context, http.StatusInternalServerError, err)
 		return
 	}
+	if err := session.Set(context, session.AdminSessionKey, &session.AdminSessionValue{
+		IsLogin: false,
+		Admin:   orm.Admin{},
+	}); err != nil {
+		httputil.NewError(context, http.StatusInternalServerError, err)
+		return
+	}
 	context.JSON(http.StatusOK, Message{Message: fmt.Sprintf("login success")})
 }
 

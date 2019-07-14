@@ -17,3 +17,16 @@ func ParseTime(timeString string, timeFormatter string) (time.Time, error) {
 	}
 	return t, err
 }
+
+func ReplaceDateOfTime(origin time.Time, replace time.Time) time.Time {
+	return time.Date(
+		replace.Year(),
+		replace.Month(),
+		replace.Day(),
+		origin.Hour(),
+		origin.Minute(),
+		origin.Second(),
+		origin.Nanosecond(),
+		origin.Location(),
+	)
+}

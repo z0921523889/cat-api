@@ -90,7 +90,7 @@ func (controller *CatThumbnailController) GetCatThumbnailList(context *gin.Conte
 	for _, catThumbnail := range catThumbnails {
 		response.CatThumbnails = append(response.CatThumbnails, CatThumbnailItem{
 			Id:               catThumbnail.ID,
-			CatThumbnailPath: fmt.Sprintf("/api/v1/thumbnail/%d", catThumbnail.ID),
+			CatThumbnailPath: fmt.Sprintf("/api/v1/cat/thumbnail/%d", catThumbnail.ID),
 		})
 	}
 	response.Lower = request.Lower
@@ -102,7 +102,7 @@ func (controller *CatThumbnailController) GetCatThumbnailList(context *gin.Conte
 // @Description get cat thumbnail from the database
 // @Accept json
 // @Produce image/jpeg
-// @Param catId path int true "貓的ID"
+// @Param thumbnailId path int true "貓的縮圖ID"
 // @Success 200 {string} binary
 // @Failure 400 {object} httputil.HTTPError
 // @Failure 500 {object} httputil.HTTPError

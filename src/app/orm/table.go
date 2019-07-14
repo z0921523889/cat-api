@@ -1,6 +1,5 @@
 package orm
 
-
 func (Session) TableName() string {
 	return "session"
 }
@@ -49,10 +48,18 @@ func (CatUserTransfer) TableName() string {
 	return "cat_user_transfer"
 }
 
+func (CatUserAdoption) TableName() string {
+	return "cat_user_adoption"
+}
+
 func (Wallet) TableName() string {
 	return "wallet"
 }
 
 func (Banner) TableName() string {
 	return "banner"
+}
+
+func (ExecuteTask) TableName() string {
+	return "execute_task"
 }

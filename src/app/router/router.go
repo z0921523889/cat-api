@@ -2,6 +2,7 @@ package router
 
 import (
 	"cat-api/src/app/controller"
+	"cat-api/src/app/env"
 	"cat-api/src/app/middleware"
 	"cat-api/src/app/session/store/postgres"
 	"github.com/gin-contrib/cors"
@@ -10,16 +11,21 @@ import (
 	"time"
 )
 
-var adminController = &controller.AdminController{}
-var userController = &controller.UserController{}
-var catController = &controller.CatController{}
-var catThumbnailController = &controller.CatThumbnailController{}
-var catWithUserController = &controller.CatWithUserController{}
-var timePeriodController = &controller.TimeScheduleController{}
-var bannerController = &controller.BannerController{}
-//middleware
-var userAuthMiddleware = &middleware.UserAuthMiddleware{}
-var adminMiddleware = &middleware.AdminAuthMiddleware{}
+var (
+	//controller
+	adminController          = &controller.AdminController{}
+	userController           = &controller.UserController{}
+	catController            = &controller.CatController{}
+	catThumbnailController   = &controller.CatThumbnailController{}
+	catReservationController = &controller.CatReservationController{}
+	catTransferController    = &controller.CatTransferController{}
+	catAdoptionController    = &controller.CatAdoptionController{}
+	timePeriodController     = &controller.TimeScheduleController{}
+	bannerController         = &controller.BannerController{}
+	//middleware
+	userAuthMiddleware = &middleware.UserAuthMiddleware{}
+	adminMiddleware    = &middleware.AdminAuthMiddleware{}
+)
 
 func InitialRouterEngine() *gin.Engine {
 	router := gin.Default()
@@ -29,14 +35,19 @@ func InitialRouterEngine() *gin.Engine {
 		AllowOriginFunc: func(origin string) bool {
 			return true
 		},
-		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD","OPTIONS"},
-		AllowHeaders:     []string{"Origin", "Content-Length", "Accept", "Content-Type","Access-Control-Allow-Origin"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Length", "Accept", "Content-Type", "Access-Control-Allow-Origin"},
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
 	}))
 	// set up session using cookie & postgres
 	store, _ := postgres.NewPostgresStore([]byte("secret"))
+	store.Options(sessions.Options{
+		Path:   "/",
+		Domain: env.DomainName,
+		MaxAge: 86400 * 30,
+	})
 	router.Use(sessions.Sessions("cat_session", store))
 	// Global middleware
 	// Logger middleware will write the logs to gin.DefaultWriter even if you set with GIN_MODE=release.
@@ -62,8 +73,8 @@ func InitialRouterEngine() *gin.Engine {
 	//schedules
 	adminAuth.POST("/time/schedule", timePeriodController.PostTimeSchedule)
 	adminAuth.POST("/time/schedules/:scheduleId/cat/:catId", timePeriodController.PostTimeScheduleCat)
-	//cat_users
-	adminAuth.PUT("/cat/adoption/owner", catWithUserController.PutAdoptionCatOwner)
+	//cat_reservation
+	adminAuth.PUT("/cat/adoption/owner", catReservationController.PutAdoptionCatOwner)
 	//banner
 	adminAuth.POST("/banner", bannerController.PostBanner)
 	adminAuth.PUT("/banner/:bannerId", bannerController.PutModifyBanner)
@@ -79,9 +90,15 @@ func InitialRouterEngine() *gin.Engine {
 	//schedules
 	userAuth.GET("/time/schedules", timePeriodController.GetTimeScheduleList)
 	userAuth.GET("/cats/time/schedules/:scheduleId", timePeriodController.GetTimeScheduleCat)
-	//cat_users
-	userAuth.POST("/cat/reservation", catWithUserController.PostCatReservations)
-	userAuth.GET("/transfer/cats", catWithUserController.GetTransferCatList)
+	//cat_reservation
+	userAuth.POST("/cat/reservation", catReservationController.PostCatReservations)
+	//cat_transfer
+	userAuth.GET("/transfer/cats", catTransferController.GetTransferCatList)
+	userAuth.GET("/certificate/transfer/:transferId", catTransferController.GetTransferCatCertificateThumbnail)
+	userAuth.POST("/transfer/:transferId/certificate", catTransferController.PostTransferCatCertificate)
+	userAuth.POST("/transfer/:transferId/migrate", catTransferController.PostTransferMigrate)
+	//cat_adoption
+	userAuth.GET("/adoption/cats", catAdoptionController.GetAdoptionCatList)
 	//banner
 	userAuth.GET("/banners", bannerController.GetBannerList)
 	userAuth.GET("/banner/:bannerId", bannerController.GetBannerThumbnail)

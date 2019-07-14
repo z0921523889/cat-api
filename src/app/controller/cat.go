@@ -91,7 +91,7 @@ type PutModifyCatRequest struct {
 // @Param adoption_price formData string true "貓的即搶價格"
 // @Param contract_days formData string true "貓的合約時間"
 // @Param contract_benefit formData string true "貓的合約增益"
-// @Param status formData string true "貓的狀態(系統代售中 : 1 / 待售中 : 2/預約中 : 3 /確認交易 :4 / 待交貨 : 5 /收養中 : 6)"
+// @Param status formData string true "貓的狀態(系統掛售中 : 1 / 期約到期掛售中 : 2/轉讓中 : 3 /領養增值中 :4 / 等待裂變中 :5)"
 // @Success 200 {object} controller.Message
 // @Failure 400 {object} httputil.HTTPError
 // @Failure 500 {object} httputil.HTTPError
@@ -160,7 +160,7 @@ type CatItem struct {
 // @Produce json
 // @Param lower query int true "貓列表的lower"
 // @Param upper query int true "貓列表的upper"
-// @Param status query int true "貓列表的狀態(系統代售中 : 1 / 待售中 : 2/預約中 : 3 /確認交易 :4 / 待交貨 : 5 /收養中 : 6)"
+// @Param status query int true "貓列表的狀態(系統掛售中 : 1 / 期約到期掛售中 : 2/轉讓中 : 3 /領養增值中 :4 / 等待裂變中 :5)"
 // @Success 200 {object} controller.GetCatListResponse
 // @Failure 400 {object} httputil.HTTPError
 // @Failure 500 {object} httputil.HTTPError
@@ -188,7 +188,7 @@ func (controller *CatController) GetCatList(context *gin.Context) {
 	for _, cat := range cats {
 		catThumbnailPath := ""
 		if cat.CatThumbnailId != 0 {
-			catThumbnailPath = fmt.Sprintf("/api/v1/thumbnail/%d", cat.CatThumbnailId)
+			catThumbnailPath = fmt.Sprintf("/api/v1/cat/thumbnail/%d", cat.CatThumbnailId)
 		}
 		response.Cats = append(response.Cats, CatItem{
 			Id:               cat.ID,

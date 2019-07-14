@@ -31,6 +31,7 @@ func ConnectDBEngine() {
 		new(CatUserReservation), new(CatUserTransfer), new(CatUserAdoption),
 		new(Wallet),
 		new(Banner),
+		new(ExecuteTask),
 	)
 	Engine.LogMode(true)
 	Engine.Exec("")

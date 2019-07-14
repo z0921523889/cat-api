@@ -211,6 +211,45 @@ paths:
           schema:
             $ref: '#/definitions/httputil.HTTPError'
             type: object
+  /api/v1/adoption/cats:
+    get:
+      consumes:
+      - application/json
+      description: get adoption cat list with status from database
+      parameters:
+      - description: 貓列表的lower
+        in: query
+        name: lower
+        required: true
+        type: integer
+      - description: 貓列表的upper
+        in: query
+        name: upper
+        required: true
+        type: integer
+      - description: '貓列表的領養狀態(  增值中: 1 / 已完成 :2 / 已售出 : 3)'
+        in: query
+        name: status
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.GetCatListResponse'
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+            type: object
   /api/v1/banner:
     post:
       consumes:
@@ -414,6 +453,45 @@ paths:
           schema:
             $ref: '#/definitions/httputil.HTTPError'
             type: object
+  /api/v1/cat/adoption/owner:
+    put:
+      consumes:
+      - multipart/form-data
+      description: modify adoption cat owner
+      parameters:
+      - description: 貓的ID識別
+        in: formData
+        name: cat_id
+        required: true
+        type: integer
+      - description: 時段的ID識別
+        in: formData
+        name: time_schedule_id
+        required: true
+        type: integer
+      - description: 用戶的ID識別
+        in: formData
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.Message'
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+            type: object
   /api/v1/cat/reservation:
     post:
       consumes:
@@ -477,6 +555,34 @@ paths:
           schema:
             $ref: '#/definitions/httputil.HTTPError'
             type: object
+  /api/v1/cat/thumbnail/{thumbnailId}:
+    get:
+      consumes:
+      - application/json
+      description: get cat thumbnail from the database
+      parameters:
+      - description: 貓的縮圖ID
+        in: path
+        name: thumbnailId
+        required: true
+        type: integer
+      produces:
+      - image/jpeg
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+            type: object
   /api/v1/cat/thumbnails:
     get:
       consumes:
@@ -511,6 +617,40 @@ paths:
           schema:
             $ref: '#/definitions/httputil.HTTPError'
             type: object
+  /api/v1/cat/thumbnails/{thumbnailId}/cats/{catId}:
+    post:
+      consumes:
+      - application/json
+      description: link cat thumbnail with cat to the database
+      parameters:
+      - description: 貓的ID
+        in: path
+        name: catId
+        required: true
+        type: integer
+      - description: 貓的縮圖ID
+        in: path
+        name: thumbnailId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.Message'
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+            type: object
   /api/v1/cats:
     get:
       consumes:
@@ -527,8 +667,7 @@ paths:
         name: upper
         required: true
         type: integer
-      - description: '貓列表的狀態(系統代售中 : 1 / 待售中 : 2/預約中 : 3 /確認交易 :4 / 待交貨 : 5 /收養中 :
-          6)'
+      - description: '貓列表的狀態(系統掛售中 : 1 / 期約到期掛售中 : 2/轉讓中 : 3 /領養增值中 :4 / 等待裂變中 :5)'
         in: query
         name: status
         required: true
@@ -607,7 +746,7 @@ paths:
         name: contract_benefit
         required: true
         type: string
-      - description: '貓的狀態(系統代售中 : 1 / 待售中 : 2/預約中 : 3 /確認交易 :4 / 待交貨 : 5 /收養中 : 6)'
+      - description: '貓的狀態(系統掛售中 : 1 / 期約到期掛售中 : 2/轉讓中 : 3 /領養增值中 :4 / 等待裂變中 :5)'
         in: formData
         name: status
         required: true
@@ -669,15 +808,15 @@ paths:
           schema:
             $ref: '#/definitions/httputil.HTTPError'
             type: object
-  /api/v1/thumbnail/{thumbnailId}:
+  /api/v1/certificate/transfer/{transferId}:
     get:
       consumes:
       - application/json
-      description: get cat thumbnail from the database
+      description: get transfer cat certificate thumbnail from the database
       parameters:
-      - description: 貓的ID
+      - description: transfer的ID
         in: path
-        name: catId
+        name: transferId
         required: true
         type: integer
       produces:
@@ -687,40 +826,6 @@ paths:
           description: OK
           schema:
             type: string
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/httputil.HTTPError'
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/httputil.HTTPError'
-            type: object
-  /api/v1/thumbnails/{thumbnailId}/cats/{catId}:
-    post:
-      consumes:
-      - application/json
-      description: link cat thumbnail with cat to the database
-      parameters:
-      - description: 貓的ID
-        in: path
-        name: catId
-        required: true
-        type: integer
-      - description: 貓的縮圖ID
-        in: path
-        name: thumbnailId
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/controller.Message'
-            type: object
         "400":
           description: Bad Request
           schema:
@@ -827,6 +932,107 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/controller.Message'
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+            type: object
+  /api/v1/transfer/{transferId}/certificate:
+    post:
+      consumes:
+      - multipart/form-data
+      description: post transfer cat certificate to database
+      parameters:
+      - description: transfer的ID
+        in: path
+        name: transferId
+        required: true
+        type: integer
+      - description: certificate的縮圖檔案
+        in: formData
+        name: certificate
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.Message'
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+            type: object
+  /api/v1/transfer/{transferId}/migrate:
+    post:
+      consumes:
+      - application/json
+      description: post transfer cat migrate to the database
+      parameters:
+      - description: transfer的ID
+        in: path
+        name: transferId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+            type: object
+  /api/v1/transfer/cats:
+    get:
+      consumes:
+      - application/json
+      description: get transfer cat list with status from database
+      parameters:
+      - description: 貓列表的lower
+        in: query
+        name: lower
+        required: true
+        type: integer
+      - description: 貓列表的upper
+        in: query
+        name: upper
+        required: true
+        type: integer
+      - description: '貓列表的交易狀態( 待交易: 1 / 買家已上傳憑證 : 2/已完成 :3 /已取消)'
+        in: query
+        name: status
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.GetCatListResponse'
             type: object
         "400":
           description: Bad Request
