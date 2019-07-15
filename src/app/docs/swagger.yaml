@@ -836,6 +836,35 @@ paths:
           schema:
             $ref: '#/definitions/httputil.HTTPError'
             type: object
+  /api/v1/identified/code/{code}/check:
+    get:
+      consumes:
+      - application/json
+      description: check identified code exist
+      parameters:
+      - description: 用戶的識別碼
+        in: path
+        name: code
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.GetUserListResponse'
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+            type: object
   /api/v1/time/schedule:
     post:
       consumes:

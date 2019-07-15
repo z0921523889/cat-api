@@ -234,3 +234,20 @@ func (controller *UserController) GetUserList(context *gin.Context) {
 	response.Total = total
 	context.JSON(http.StatusOK, &response)
 }
+
+// @Description check identified code exist
+// @Accept json
+// @Produce json
+// @Param code path int true "用戶的識別碼"
+// @Success 200 {object} controller.GetUserListResponse
+// @Failure 400 {object} httputil.HTTPError
+// @Failure 500 {object} httputil.HTTPError
+// @Router /api/v1/identified/code/{code}/check [get]
+func (controller *UserController) GetCheckIdentifiedCode(context *gin.Context) {
+	code := context.Param("code")
+	if orm.Engine.Where("identified_code = ?", code).First(&orm.User{}).RecordNotFound() {
+		httputil.NewError(context, http.StatusInternalServerError, errors.New("record not found"))
+		return
+	}
+	context.JSON(http.StatusOK, Message{Message: fmt.Sprintf("found user with identified_code = %s", code)})
+}
