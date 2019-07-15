@@ -124,7 +124,7 @@ type CatUserAdoption struct {
 	UserId     uint      `gorm:"column:user_id"`
 	StartTime  time.Time `gorm:"not null;column:start_time"`
 	EndTime    time.Time `gorm:"not null;column:end_time"`
-	//state:       增值中: 1 / 已完成 :2 / 已售出 : 3
+	//state:       增值中: 1 / 已完成 :2 / 已售出 : 3 / 等待裂變中 : 4
 	Status int64 `gorm:"type:integer;not null;column:status"`
 	Cat    Cat   `gorm:"foreignkey:CatId"`
 	User   User  `gorm:"foreignkey:UserId"`

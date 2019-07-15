@@ -41,7 +41,7 @@ type AdoptionCatItem struct {
 // @Produce json
 // @Param lower query int true "貓列表的lower"
 // @Param upper query int true "貓列表的upper"
-// @Param status query int true "貓列表的領養狀態(  增值中: 1 / 已完成 :2 / 已售出 : 3)"
+// @Param status query int true "貓列表的領養狀態( 增值中: 1 / 已完成 :2 / 已售出 : 3 / 等待裂變 : 4)"
 // @Success 200 {object} controller.GetCatListResponse
 // @Failure 400 {object} httputil.HTTPError
 // @Failure 500 {object} httputil.HTTPError

@@ -86,7 +86,7 @@
                     },
                     {
                         "type": "integer",
-                        "description": "貓列表的領養狀態(  增值中: 1 / 已完成 :2 / 已售出 : 3)",
+                        "description": "貓列表的領養狀態( 增值中: 1 / 已完成 :2 / 已售出 : 3 / 等待裂變 : 4)",
                         "name": "status",
                         "in": "query",
                         "required": true

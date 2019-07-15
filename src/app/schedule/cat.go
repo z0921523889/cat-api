@@ -155,6 +155,7 @@ func endingCatContract(data EndingCatContractTaskData) {
 		return
 	}
 	if int(catUserAdoption.Cat.Price) >= maxPriceOfCat {
+		catUserAdoption.Status = 4
 		catUserAdoption.Cat.Status = 5
 		if err := orm.Engine.Save(&catUserAdoption).Save(&userWallet).Error; err != nil {
 			return

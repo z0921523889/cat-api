@@ -176,6 +176,7 @@ func (controller *UserController) GetUserInfo(context *gin.Context) {
 
 type GetUserListRequest struct {
 	ListRequest
+	Status int `form:"status" json:"status"`
 }
 
 type GetUserListResponse struct {
@@ -208,7 +209,12 @@ func (controller *UserController) GetUserList(context *gin.Context) {
 		httputil.NewError(context, http.StatusBadRequest, err)
 		return
 	}
-	if err := orm.Engine.Table("user").Not("phone = ?", "system").Count(&total).
+	command := orm.Engine.Table("user")
+	if request.Status > 0 {
+		command = command.Where("Status = ?", request.Status)
+	}
+	command = command.Not("phone = ?", "system")
+	if err := command.Count(&total).
 		Limit(request.Upper - request.Lower + 1).Offset(request.Lower).
 		Find(&users).Error; err != nil {
 		httputil.NewError(context, http.StatusInternalServerError, err)
