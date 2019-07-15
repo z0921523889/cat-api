@@ -8,17 +8,18 @@ import (
 )
 
 var (
-	Type              string
-	ProjectName       string
-	Version           string
-	DomainName        string
-	ApplicationHost   string
-	ApplicationPort   string
-	PostgresHost      string
-	PostgresPort      string
-	PostgresUser      string
-	PostgresPassword  string
-	ScheduleJobEnable bool
+	Type               string
+	ProjectName        string
+	Version            string
+	FullPathDomainName string
+	DomainName         string
+	ApplicationHost    string
+	ApplicationPort    string
+	PostgresHost       string
+	PostgresPort       string
+	PostgresUser       string
+	PostgresPassword   string
+	ScheduleJobEnable  bool
 )
 
 func LoadEnv() {
@@ -31,6 +32,7 @@ func LoadEnv() {
 	Type = os.Getenv("TYPE")
 	ProjectName = os.Getenv("PROJECT_NAME")
 	Version = os.Getenv("VERSION")
+	FullPathDomainName = os.Getenv("FULL_PATH_DOMAIN_NAME")
 	DomainName = os.Getenv("DOMAIN_NAME")
 	ApplicationHost = os.Getenv("APPLICATION_HOST")
 	ApplicationPort = os.Getenv("APPLICATION_PORT")

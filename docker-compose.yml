@@ -18,6 +18,7 @@ services:
       TYPE: ${TYPE}
       PROJECT_NAME: ${PROJECT_NAME}
       VERSION: ${VERSION}
+      FULL_PATH_DOMAIN_NAME: ${FULL_PATH_DOMAIN_NAME}
       DOMAIN_NAME: ${DOMAIN_NAME}
       APPLICATION_HOST: ${APPLICATION_HOST}
       APPLICATION_PORT: ${APPLICATION_PORT}
@@ -38,7 +39,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     expose:
-      - ${POSTGRES_PORT}
+      - ${POSTGRES_PORT}:${POSTGRES_PORT}
     volumes:
       - sys_postgres_db:/var/lib/postgresql/data
     networks:

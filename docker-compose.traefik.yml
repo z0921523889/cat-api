@@ -6,7 +6,7 @@ services:
     container_name: traefik
     labels:
       traefik.enable: "true"
-      traefik.frontend.rule: "Host:${DOMAIN_NAME}"
+      traefik.frontend.rule: "Host:${FULL_PATH_DOMAIN_NAME}"
       traefik.backend: "traefik"
       traefik.port: "9987"
     ports:
@@ -36,6 +36,7 @@ services:
       TYPE: ${TYPE}
       PROJECT_NAME: ${PROJECT_NAME}
       VERSION: ${VERSION}
+      FULL_PATH_DOMAIN_NAME: ${FULL_PATH_DOMAIN_NAME}
       DOMAIN_NAME: ${DOMAIN_NAME}
       APPLICATION_HOST: ${APPLICATION_HOST}
       APPLICATION_PORT: ${APPLICATION_PORT}
